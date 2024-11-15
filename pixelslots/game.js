@@ -21,8 +21,9 @@ class PixelSlots {
         this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
         
-        // API endpoint
-        this.apiUrl = 'api.php';
+        console.log('Initializing game...');
+        console.log('Telegram WebApp:', this.webApp);
+        console.log('Telegram User:', this.webApp.initDataUnsafe?.user);
 
         this.setupTelegram();
         this.initializeGame();
@@ -32,6 +33,7 @@ class PixelSlots {
         try {
             if (!this.webApp.initDataUnsafe?.user?.id) {
                 console.error('No Telegram user ID found');
+                alert('Please open this game in Telegram!');
                 return null;
             }
 
@@ -44,27 +46,37 @@ class PixelSlots {
             });
             
             const response = await fetch(
-                `${this.apiUrl}?telegram_id=${telegramId}&username=${username}`
+                `api.php?telegram_id=${telegramId}&username=${username}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
 
-            if (!response.ok) {
-                throw new Error('Failed to load user data');
-            }
-
             const userData = await response.json();
-            console.log('Loaded user data:', userData);
+            console.log('API Response:', userData);
+            
+            if (userData.error) {
+                console.error('API Error:', userData.error);
+                alert('Error loading user data: ' + userData.error);
+                return null;
+            }
             
             if (userData && typeof userData.balance === 'number') {
                 await this.updateBalance(userData.balance);
                 console.log('Updated balance to:', userData.balance);
             } else {
                 console.error('Invalid user data received:', userData);
-                throw new Error('Invalid user data');
+                alert('Invalid user data received');
+                return null;
             }
 
             return userData;
         } catch (error) {
             console.error('Error loading user data:', error);
+            alert('Error: ' + error.message);
             return null;
         }
     }
@@ -86,7 +98,7 @@ class PixelSlots {
             });
 
             const response = await fetch(
-                `${this.apiUrl}?telegram_id=${telegramId}`,
+                `api.php?telegram_id=${telegramId}`,
                 {
                     method: 'POST',
                     headers: {
@@ -101,15 +113,19 @@ class PixelSlots {
                 }
             );
 
-            if (!response.ok) {
-                throw new Error('Failed to save user data');
+            const userData = await response.json();
+            console.log('API Save Response:', userData);
+            
+            if (userData.error) {
+                console.error('API Save Error:', userData.error);
+                alert('Error saving data: ' + userData.error);
+                return null;
             }
 
-            const userData = await response.json();
-            console.log('Saved user data:', userData);
             return userData;
         } catch (error) {
             console.error('Error saving user data:', error);
+            alert('Error: ' + error.message);
             await this.loadUserData();
         }
     }
@@ -291,6 +307,7 @@ class PixelSlots {
     async spin() {
         if (this.isSpinning || this.balance < this.bet) {
             this.webApp.HapticFeedback.notificationOccurred('error');
+            alert('Insufficient balance or already spinning!');
             return;
         }
 
@@ -321,6 +338,7 @@ class PixelSlots {
             await this.checkWin(finalSymbols);
         } catch (error) {
             console.error('Spin error:', error);
+            alert('Error: ' + error.message);
         } finally {
             this.isSpinning = false;
             this.spinButton.disabled = false;
