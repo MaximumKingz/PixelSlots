@@ -7,8 +7,6 @@ class PixelSlots {
         console.log('=== TELEGRAM INITIALIZATION ===');
         console.log('WebApp Version:', this.webApp.version);
         console.log('Platform:', this.webApp.platform);
-        console.log('Init Data:', this.webApp.initData);
-        console.log('Init Data Unsafe:', this.webApp.initDataUnsafe);
         
         // Verify Telegram user
         const user = this.webApp.initDataUnsafe?.user;
@@ -45,7 +43,14 @@ class PixelSlots {
         
         // Firebase database
         this.database = firebase.database();
+        this.analytics = firebase.analytics();
         this.userRef = null;
+
+        // Track game load
+        this.analytics.logEvent('game_loaded', {
+            telegram_id: user.id,
+            username: user.username
+        });
 
         // Initialize game
         this.initializeGame();
@@ -94,6 +99,12 @@ class PixelSlots {
                 };
                 await this.userRef.set(userData);
                 console.log('Created new user:', userData);
+
+                // Track new user
+                this.analytics.logEvent('new_user_created', {
+                    telegram_id: telegramId,
+                    username: username
+                });
             } else {
                 console.log('Found existing user:', userData);
             }
@@ -145,10 +156,29 @@ class PixelSlots {
 
                 if (isJackpot) {
                     updates.jackpots_won = userData.jackpots_won + 1;
+                    
+                    // Track jackpot win
+                    this.analytics.logEvent('jackpot_won', {
+                        telegram_id: telegramId,
+                        amount: winAmount
+                    });
                 }
+
+                // Track win
+                this.analytics.logEvent('game_win', {
+                    telegram_id: telegramId,
+                    amount: winAmount,
+                    is_jackpot: isJackpot
+                });
             } else {
                 updates.total_losses = userData.total_losses + 1;
                 updates.total_loss_amount = userData.total_loss_amount + winAmount;
+
+                // Track loss
+                this.analytics.logEvent('game_loss', {
+                    telegram_id: telegramId,
+                    amount: winAmount
+                });
             }
 
             // Save to Firebase
@@ -330,15 +360,21 @@ class PixelSlots {
     }
 
     async spin() {
-        if (this.isSpinning || this.balance < this.bet) {
-            this.webApp.HapticFeedback.notificationOccurred('error');
-            alert('Insufficient balance or already spinning!');
+        if (this.isSpinning) return;
+        if (this.balance < this.bet) {
+            alert('Not enough balance!');
             return;
         }
 
         this.isSpinning = true;
-        this.spinButton.disabled = true;
-        await this.updateBalance(this.balance - this.bet);
+        this.balance -= this.bet;
+        this.updateBalanceDisplay();
+
+        // Track spin
+        this.analytics.logEvent('game_spin', {
+            telegram_id: this.webApp.initDataUnsafe?.user?.id,
+            bet_amount: this.bet
+        });
 
         try {
             this.reels.forEach(reel => reel.classList.add('spinning'));
@@ -366,7 +402,6 @@ class PixelSlots {
             alert('Error: ' + error.message);
         } finally {
             this.isSpinning = false;
-            this.spinButton.disabled = false;
 
             if (this.autoPlayActive && this.balance >= this.bet) {
                 setTimeout(() => this.spin(), 1000);
