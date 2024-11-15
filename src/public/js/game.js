@@ -1,14 +1,19 @@
 class PixelSlots {
     constructor() {
-        this.symbols = ['🍒', '🍋', '🍊', '💎', '7️⃣', '🎰'];
+        // Regular symbols (more common)
+        this.regularSymbols = ['🍒', '🍋', '🍊', '💎', '7️⃣'];
+        // Jackpot symbol (very rare)
+        this.jackpotSymbol = '🎰';
+        
         this.symbolValues = {
             '🍒': 2,
             '🍋': 3,
             '🍊': 4,
             '💎': 10,
             '7️⃣': 20,
-            '🎰': 50
+            '🎰': 10000 // Jackpot multiplier
         };
+        
         this.balance = 10.00;
         this.bet = 0.10;
         this.jackpot = 1000.00;
@@ -85,7 +90,13 @@ class PixelSlots {
     }
 
     getRandomSymbol() {
-        return this.symbols[Math.floor(Math.random() * this.symbols.length)];
+        // 0.01% chance for jackpot symbol (1 in 10,000)
+        if (Math.random() < 0.0001) {
+            return this.jackpotSymbol;
+        }
+        
+        // Otherwise, return a random regular symbol
+        return this.regularSymbols[Math.floor(Math.random() * this.regularSymbols.length)];
     }
 
     async spin() {
@@ -98,16 +109,13 @@ class PixelSlots {
         this.spinButton.disabled = true;
         this.updateBalance(this.balance - this.bet);
 
-        // Keep jackpot constant
-        this.updateJackpot(1000.00);
-
         try {
             // Start spinning animation
             this.reels.forEach(reel => reel.classList.add('spinning'));
             window.audioManager?.playSpinSound();
 
-            // Generate final symbols
-            const finalSymbols = this.reels.map(() => this.getRandomSymbol());
+            // Generate final symbols with jackpot probability
+            const finalSymbols = Array(3).fill(null).map(() => this.getRandomSymbol());
 
             // Stop reels one by one
             for (let i = 0; i < this.reels.length; i++) {
