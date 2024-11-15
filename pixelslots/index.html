@@ -19,6 +19,13 @@
         <p>Loading...</p>
     </div>
 
+    <!-- Error Screen -->
+    <div id="error-screen" style="display: none;">
+        <h1>⚠️ Error</h1>
+        <p id="error-message">Please open in Telegram!</p>
+        <button onclick="window.location.reload()" class="big-button">Try Again</button>
+    </div>
+
     <!-- Game Screen -->
     <div id="game-container" style="display: none;">
         <div id="game-header">
@@ -91,13 +98,12 @@
         window.DEBUG = true;
         window.log = (...args) => window.DEBUG && console.log(...args);
 
-        // Initialize Supabase
-        const supabaseUrl = 'https://vcspybmymfmxhvqeehkp.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc3B5Ym15bWZteGh2cWVlaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2OTU3NzEsImV4cCI6MjA0NzI3MTc3MX0.wyzWwNd5F0HDjKCRPnSZ7vXajh6XVa9t0TjU5PG6P7I';
-        
-        window.log('Initializing Supabase...');
-        const { createClient } = supabase;
-        window.supabase = createClient(supabaseUrl, supabaseKey);
+        // Show error
+        function showError(message) {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'flex';
+            document.getElementById('error-message').textContent = message;
+        }
 
         // Initialize Telegram WebApp
         window.addEventListener('load', async () => {
@@ -121,6 +127,7 @@
                 window.log('User:', tg.initDataUnsafe?.user);
                 window.log('Platform:', tg.platform);
                 window.log('Version:', tg.version);
+                window.log('Init Data:', tg.initData);
 
                 // Check if user exists
                 const user = tg.initDataUnsafe?.user;
@@ -128,19 +135,77 @@
                     throw new Error('Please open in Telegram!');
                 }
 
-                // Initialize game
-                window.game = new PixelSlots();
+                // Initialize Supabase
+                const supabaseUrl = 'https://vcspybmymfmxhvqeehkp.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc3B5Ym15bWZteGh2cWVlaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2OTU3NzEsImV4cCI6MjA0NzI3MTc3MX0.wyzWwNd5F0HDjKCRPnSZ7vXajh6XVa9t0TjU5PG6P7I';
+                
+                window.log('Initializing Supabase...');
+                const { createClient } = supabase;
+                window.supabase = createClient(supabaseUrl, supabaseKey);
 
-                // Hide loading screen
-                document.getElementById('loading-screen').style.display = 'none';
-                // Show game
-                document.getElementById('game-container').style.display = 'block';
+                try {
+                    // Try to get user data
+                    let { data: userData, error } = await window.supabase
+                        .from('users')
+                        .select('*')
+                        .eq('telegram_id', user.id.toString())
+                        .single();
 
-                // Mark as ready
-                tg.ready();
+                    window.log('User data:', userData, 'Error:', error);
+
+                    // If user doesn't exist, create them
+                    if (!userData) {
+                        const newUser = {
+                            telegram_id: user.id.toString(),
+                            username: user.username || user.first_name || '',
+                            balance: 10.00,
+                            total_spins: 0,
+                            total_wins: 0,
+                            total_losses: 0,
+                            biggest_win: 0,
+                            total_win_amount: 0,
+                            total_loss_amount: 0,
+                            jackpots_won: 0,
+                            last_spin: new Date().toISOString(),
+                            last_win: new Date().toISOString(),
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        };
+
+                        window.log('Creating new user:', newUser);
+
+                        const { data: insertedUser, error: insertError } = await window.supabase
+                            .from('users')
+                            .insert([newUser])
+                            .select()
+                            .single();
+
+                        if (insertError) {
+                            window.log('Insert error:', insertError);
+                            throw new Error('Failed to create user');
+                        }
+
+                        userData = insertedUser;
+                        window.log('Created user:', userData);
+                    }
+
+                    // Initialize game
+                    window.game = new PixelSlots(userData);
+
+                    // Hide loading screen
+                    document.getElementById('loading-screen').style.display = 'none';
+                    // Show game
+                    document.getElementById('game-container').style.display = 'block';
+
+                    // Mark as ready
+                    tg.ready();
+                } catch (dbError) {
+                    window.log('Database error:', dbError);
+                    throw new Error('Could not connect to game server. Please try again later.');
+                }
             } catch (error) {
                 window.log('Initialization error:', error);
-                alert('Error: ' + error.message);
+                showError(error.message);
             }
         });
     </script>

@@ -1,5 +1,5 @@
 /* Loading Screen */
-#loading-screen {
+#loading-screen, #error-screen {
     position: fixed;
     top: 0;
     left: 0;
@@ -11,6 +11,8 @@
     align-items: center;
     justify-content: center;
     z-index: 2000;
+    text-align: center;
+    padding: 20px;
 }
 
 .loader {
@@ -28,34 +30,17 @@
     font-size: 1.2em;
 }
 
-/* Registration Screen */
-#registration-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    text-align: center;
-    background: #1a1a1a;
-    z-index: 1000;
-}
-
-#registration-screen h1 {
+/* Error Screen */
+#error-screen h1 {
+    color: #ff4444;
     font-size: 2em;
     margin-bottom: 20px;
-    color: #4CAF50;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-#registration-screen p {
+#error-screen p {
+    color: white;
     font-size: 1.2em;
     margin-bottom: 30px;
-    color: #FFD700;
 }
 
 .big-button {
@@ -241,6 +226,23 @@ button:disabled {
     to { transform: translateY(-100%); }
 }
 
+/* Spinning Animation */
+@keyframes spin {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-300px); }
+}
+
+.reel.spinning .symbol {
+    animation: spin 0.5s linear infinite;
+}
+
+.reel .symbol {
+    font-size: 48px;
+    line-height: 60px;
+    text-align: center;
+    transition: transform 0.2s ease-out;
+}
+
 #win-overlay {
     position: fixed;
     top: 0;
@@ -294,11 +296,11 @@ button:disabled {
         padding: 10px;
     }
 
-    #registration-screen h1 {
+    #error-screen h1 {
         font-size: 1.5em;
     }
 
-    #registration-screen p {
+    #error-screen p {
         font-size: 1em;
     }
 

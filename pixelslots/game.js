@@ -1,6 +1,6 @@
 class PixelSlots {
-    constructor() {
-        window.log('Starting game initialization...');
+    constructor(userData) {
+        window.log('Starting game initialization with user data:', userData);
 
         // Initialize Telegram WebApp
         this.webApp = window.Telegram.WebApp;
@@ -40,147 +40,121 @@ class PixelSlots {
             '🎰': 10000
         };
         
-        // Default values
-        this.balance = 10.00; // Start with $10
+        // Set user data
+        this.userData = userData;
+        this.balance = userData.balance;
         this.bet = 0.10;
         this.jackpot = 1000.00;
         this.isSpinning = false;
         this.autoPlayActive = false;
+        this.savingData = false;
 
         // Initialize UI first
         this.initializeUI();
 
-        // Load user data
-        this.loadUserData().then(() => {
-            window.log('Game ready to play!');
-            // Enable spin button
-            this.spinButton.disabled = false;
-            this.spinButton.textContent = 'SPIN!';
-        }).catch(error => {
-            window.log('Error loading user data:', error);
-            // Disable spin button
-            this.spinButton.disabled = true;
-            this.spinButton.textContent = 'ERROR';
-            alert(error.message);
+        // Update displays
+        this.updateBalanceDisplay();
+        this.updateBetDisplay();
+        this.updateWinTable();
+        this.updateJackpot(1000.00);
+
+        // Set initial symbols
+        this.reels.forEach(reel => {
+            reel.querySelector('.symbol').textContent = this.getRandomSymbol();
         });
-    }
 
-    async loadUserData() {
-        try {
-            // Get Telegram user
-            const user = this.webApp.initDataUnsafe?.user;
-            if (!user || !user.id) {
-                throw new Error('Please open in Telegram!');
-            }
+        // Enable spin button
+        this.spinButton.disabled = false;
+        this.spinButton.textContent = 'SPIN!';
 
-            // Get user info
-            const telegramId = user.id.toString();
-            const username = user.username || user.first_name || '';
-            
-            window.log('=== LOADING USER DATA ===');
-            window.log('Telegram ID:', telegramId);
-            window.log('Username:', username);
-            
-            // Get user data from Supabase
-            let { data: userData, error } = await window.supabase
-                .from('users')
-                .select('*')
-                .eq('telegram_id', telegramId)
-                .single();
-
-            window.log('Supabase response:', { userData, error });
-
-            if (error) throw error;
-            if (!userData) throw new Error('User not found!');
-
-            // Update balance and display
-            this.balance = userData.balance;
-            this.updateBalanceDisplay();
-            this.updateBetDisplay();
-            this.updateWinTable();
-            this.updateJackpot(1000.00);
-
-            // Set initial symbols
-            this.reels.forEach(reel => {
-                reel.querySelector('.symbol').textContent = this.getRandomSymbol();
-            });
-
-            window.log('Balance Updated:', this.balance);
-            return userData;
-        } catch (error) {
-            window.log('Error loading user:', error);
-            throw error; // Re-throw to handle in constructor
-        }
+        window.log('Game initialized with balance:', this.balance);
     }
 
     async saveUserData(winAmount = 0, isWin = false, isJackpot = false) {
-        try {
-            // Get Telegram user
-            const user = this.webApp.initDataUnsafe?.user;
-            if (!user || !user.id) {
-                throw new Error('Please open in Telegram!');
-            }
+        const maxRetries = 3;
+        let retryCount = 0;
 
-            // Get user info
-            const telegramId = user.id.toString();
-            
-            window.log('=== SAVING USER DATA ===');
-            window.log('Telegram ID:', telegramId);
-            window.log('Current Balance:', this.balance);
-            
-            // Get current data
-            let { data: userData, error } = await window.supabase
-                .from('users')
-                .select('*')
-                .eq('telegram_id', telegramId)
-                .single();
-
-            if (error) throw error;
-            if (!userData) throw new Error('User not found!');
-            
-            // Update user data
-            const updates = {
-                balance: this.balance,
-                total_spins: userData.total_spins + 1,
-                updated_at: new Date().toISOString(),
-                last_spin: new Date().toISOString()
-            };
-
-            if (isWin) {
-                updates.total_wins = userData.total_wins + 1;
-                updates.total_win_amount = userData.total_win_amount + winAmount;
-                updates.biggest_win = Math.max(userData.biggest_win, winAmount);
-                updates.last_win = new Date().toISOString();
-
-                if (isJackpot) {
-                    updates.jackpots_won = userData.jackpots_won + 1;
+        while (retryCount < maxRetries) {
+            try {
+                // Get Telegram user
+                const user = this.webApp.initDataUnsafe?.user;
+                if (!user || !user.id) {
+                    throw new Error('Please open in Telegram!');
                 }
-            } else {
-                updates.total_losses = userData.total_losses + 1;
-                updates.total_loss_amount = userData.total_loss_amount + winAmount;
+
+                // Get user info
+                const telegramId = user.id.toString();
+                
+                window.log('=== SAVING USER DATA ===');
+                window.log('Telegram ID:', telegramId);
+                window.log('Current Balance:', this.balance);
+                window.log('Retry Count:', retryCount);
+                
+                // Get current data
+                let { data: userData, error } = await window.supabase
+                    .from('users')
+                    .select('*')
+                    .eq('telegram_id', telegramId)
+                    .single();
+
+                if (error) throw error;
+                if (!userData) throw new Error('User not found!');
+                
+                // Update user data
+                const updates = {
+                    balance: this.balance,
+                    total_spins: userData.total_spins + 1,
+                    updated_at: new Date().toISOString(),
+                    last_spin: new Date().toISOString()
+                };
+
+                if (isWin) {
+                    updates.total_wins = userData.total_wins + 1;
+                    updates.total_win_amount = userData.total_win_amount + winAmount;
+                    updates.biggest_win = Math.max(userData.biggest_win, winAmount);
+                    updates.last_win = new Date().toISOString();
+
+                    if (isJackpot) {
+                        updates.jackpots_won = userData.jackpots_won + 1;
+                    }
+                } else {
+                    updates.total_losses = userData.total_losses + 1;
+                    updates.total_loss_amount = userData.total_loss_amount + winAmount;
+                }
+
+                // Save to Supabase
+                window.log('Saving updates:', updates);
+                const { data: updatedData, error: updateError } = await window.supabase
+                    .from('users')
+                    .update(updates)
+                    .eq('telegram_id', telegramId)
+                    .select()
+                    .single();
+
+                if (updateError) throw updateError;
+                window.log('Updated user data:', updatedData);
+
+                return updatedData;
+            } catch (error) {
+                window.log('Error saving user (attempt ' + (retryCount + 1) + ' of ' + maxRetries + '):', error);
+                retryCount++;
+                
+                if (retryCount === maxRetries) {
+                    // On final retry, show error to user
+                    this.webApp.HapticFeedback.notificationOccurred('error');
+                    alert('Failed to save game progress. Please check your connection.');
+                    throw error;
+                }
+                
+                // Wait before retrying
+                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
             }
-
-            // Save to Supabase
-            window.log('Saving updates:', updates);
-            const { data: updatedData, error: updateError } = await window.supabase
-                .from('users')
-                .update(updates)
-                .eq('telegram_id', telegramId)
-                .select()
-                .single();
-
-            if (updateError) throw updateError;
-            window.log('Updated user data:', updatedData);
-
-            return updatedData;
-        } catch (error) {
-            window.log('Error saving user:', error);
-            throw error;
         }
     }
 
     async spin() {
-        if (this.isSpinning) return;
+        // Prevent multiple spins
+        if (this.isSpinning || this.savingData) return;
         if (this.balance < this.bet) {
             alert('Not enough balance!');
             return;
@@ -191,10 +165,15 @@ class PixelSlots {
         this.spinButton.textContent = 'SPINNING...';
 
         this.isSpinning = true;
-        this.balance -= this.bet;
-        this.updateBalanceDisplay();
-
+        this.savingData = false;
+        
         try {
+            // Deduct bet
+            const previousBalance = this.balance;
+            this.balance -= this.bet;
+            this.updateBalanceDisplay();
+
+            // Start spinning animation
             this.reels.forEach(reel => reel.classList.add('spinning'));
             this.webApp.HapticFeedback.impactOccurred('light');
 
@@ -211,12 +190,15 @@ class PixelSlots {
             });
 
             // Check for win
+            this.savingData = true;
             await this.checkWin(symbols);
         } catch (error) {
             window.log('Spin error:', error);
             alert('Error: ' + error.message);
         } finally {
             this.isSpinning = false;
+            this.savingData = false;
+            
             // Enable spin button if we have enough balance
             this.spinButton.disabled = this.balance < this.bet;
             this.spinButton.textContent = 'SPIN!';
