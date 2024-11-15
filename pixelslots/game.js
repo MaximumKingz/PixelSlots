@@ -24,10 +24,13 @@ class PixelSlots {
         // Use Strato API URL
         this.apiUrl = 'https://maximumkingz.de/pixelslots/api.php';
         
-        console.log('Game initialized with API:', this.apiUrl);
+        console.log('Game initialized');
+        console.log('API URL:', this.apiUrl);
         console.log('Telegram WebApp:', this.webApp);
         console.log('Telegram User:', this.webApp.initDataUnsafe?.user);
+        console.log('Telegram User ID:', this.webApp.initDataUnsafe?.user?.id);
 
+        // Initialize game immediately
         this.setupTelegram();
         this.initializeGame();
     }
@@ -44,7 +47,8 @@ class PixelSlots {
             
             console.log('Loading data for user:', {
                 telegramId,
-                username
+                username,
+                url: `${this.apiUrl}?telegram_id=${telegramId}&username=${username}`
             });
             
             const response = await fetch(
@@ -54,17 +58,23 @@ class PixelSlots {
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
-                    },
-                    mode: 'cors'
+                    }
                 }
             );
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            console.log('API Response Status:', response.status);
+            const responseText = await response.text();
+            console.log('API Response Text:', responseText);
+
+            let userData;
+            try {
+                userData = JSON.parse(responseText);
+            } catch (e) {
+                console.error('Failed to parse API response:', e);
+                return null;
             }
 
-            const userData = await response.json();
-            console.log('API Response:', userData);
+            console.log('API Response Parsed:', userData);
             
             if (userData && typeof userData.balance === 'number') {
                 await this.updateBalance(userData.balance);
@@ -89,12 +99,17 @@ class PixelSlots {
             }
 
             const telegramId = this.webApp.initDataUnsafe.user.id.toString();
-            console.log('Saving data for user:', {
-                telegramId,
+            const data = {
                 balance: this.balance,
                 isWin,
                 winAmount,
                 isJackpot
+            };
+
+            console.log('Saving data for user:', {
+                telegramId,
+                data,
+                url: `${this.apiUrl}?telegram_id=${telegramId}`
             });
 
             const response = await fetch(
@@ -105,22 +120,23 @@ class PixelSlots {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    mode: 'cors',
-                    body: JSON.stringify({
-                        balance: this.balance,
-                        isWin,
-                        winAmount,
-                        isJackpot
-                    })
+                    body: JSON.stringify(data)
                 }
             );
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            console.log('API Save Response Status:', response.status);
+            const responseText = await response.text();
+            console.log('API Save Response Text:', responseText);
+
+            let userData;
+            try {
+                userData = JSON.parse(responseText);
+            } catch (e) {
+                console.error('Failed to parse API save response:', e);
+                return null;
             }
 
-            const userData = await response.json();
-            console.log('API Save Response:', userData);
+            console.log('API Save Response Parsed:', userData);
             return userData;
         } catch (error) {
             console.error('Error saving user data:', error);
