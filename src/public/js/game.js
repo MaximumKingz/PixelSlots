@@ -38,6 +38,8 @@ class PixelSlots {
             }
 
             const username = this.webApp.initDataUnsafe.user.username || '';
+            console.log('Loading data for user:', this.webApp.initDataUnsafe.user.id);
+            
             const response = await fetch(
                 `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}?username=${username}`,
                 {
@@ -55,8 +57,13 @@ class PixelSlots {
             const userData = await response.json();
             console.log('Loaded user data:', userData);
             
-            // Update the game with the loaded balance
-            this.updateBalance(userData.balance);
+            if (userData && typeof userData.balance === 'number') {
+                this.updateBalance(userData.balance);
+            } else {
+                console.error('Invalid user data received:', userData);
+                throw new Error('Invalid user data');
+            }
+
             return userData;
         } catch (error) {
             console.error('Error loading user data:', error);
@@ -70,6 +77,13 @@ class PixelSlots {
                 console.error('No Telegram user ID found');
                 return;
             }
+
+            console.log('Saving data for user:', this.webApp.initDataUnsafe.user.id, {
+                balance: this.balance,
+                isWin,
+                winAmount,
+                isJackpot
+            });
 
             const response = await fetch(
                 `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}/update`,
@@ -96,6 +110,8 @@ class PixelSlots {
             return userData;
         } catch (error) {
             console.error('Error saving user data:', error);
+            // If save fails, try to reload user data
+            await this.loadUserData();
         }
     }
 

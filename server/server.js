@@ -29,28 +29,47 @@ app.get('/', (req, res) => {
 app.get('/api/user/:telegramId', async (req, res) => {
     try {
         const { telegramId } = req.params;
+        console.log('Looking for user:', telegramId);
+
+        // First, try to find existing user
         let user = await User.findOne({ telegramId });
         
-        // Create new user if not exists
-        if (!user) {
-            console.log('Creating new user:', telegramId);
-            user = await User.create({
-                telegramId,
-                username: req.query.username,
-                balance: 10.00,
-                hasReceivedBonus: true,
-                created: Date.now(),
-                lastUpdated: Date.now()
-            });
-            console.log('New user created:', user);
-        } else {
-            console.log('Existing user found:', telegramId);
+        if (user) {
+            console.log('Found existing user:', user);
+            return res.json(user);
         }
+
+        // If no user exists, create a new one with $10 bonus
+        console.log('Creating new user with $10 bonus');
+        user = new User({
+            telegramId,
+            username: req.query.username || '',
+            balance: 10.00,
+            hasReceivedBonus: true,
+            created: Date.now(),
+            lastUpdated: Date.now(),
+            stats: {
+                totalSpins: 0,
+                totalWins: 0,
+                totalLosses: 0,
+                biggestWin: 0,
+                totalWinAmount: 0,
+                totalLossAmount: 0,
+                jackpotsWon: 0
+            }
+        });
+
+        // Save the new user
+        await user.save();
+        console.log('New user created successfully:', user);
         
         res.json(user);
     } catch (error) {
-        console.error('Error getting user:', error);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Error in user creation/retrieval:', error);
+        res.status(500).json({ 
+            error: 'Server error',
+            details: error.message 
+        });
     }
 });
 
@@ -59,58 +78,65 @@ app.post('/api/user/:telegramId/update', async (req, res) => {
     try {
         const { telegramId } = req.params;
         const { balance, isWin, winAmount, isJackpot } = req.body;
+
+        console.log('Updating user:', telegramId, 'with balance:', balance);
         
-        // Find user first to validate
-        const existingUser = await User.findOne({ telegramId });
-        if (!existingUser) {
+        // Find user first
+        const user = await User.findOne({ telegramId });
+        if (!user) {
+            console.error('User not found:', telegramId);
             return res.status(404).json({ error: 'User not found' });
         }
 
+        // Prepare update data
         const updateData = {
             balance,
             lastUpdated: Date.now(),
             lastSpin: Date.now()
         };
 
-        // Update stats
-        const statsUpdate = {
-            'stats.totalSpins': 1
-        };
-
         if (isWin) {
-            statsUpdate['stats.totalWins'] = 1;
-            statsUpdate['stats.totalWinAmount'] = winAmount;
             updateData.lastWin = Date.now();
-
-            if (isJackpot) {
-                statsUpdate['stats.jackpotsWon'] = 1;
-            }
-        } else {
-            statsUpdate['stats.totalLosses'] = 1;
-            statsUpdate['stats.totalLossAmount'] = winAmount;
-        }
-        
-        const user = await User.findOneAndUpdate(
-            { telegramId },
-            {
-                $set: updateData,
-                $inc: statsUpdate,
-                $max: {
-                    'stats.biggestWin': winAmount || 0
+            await User.updateOne(
+                { telegramId },
+                {
+                    $set: updateData,
+                    $inc: {
+                        'stats.totalSpins': 1,
+                        'stats.totalWins': 1,
+                        'stats.totalWinAmount': winAmount,
+                        'stats.jackpotsWon': isJackpot ? 1 : 0
+                    },
+                    $max: {
+                        'stats.biggestWin': winAmount
+                    }
                 }
-            },
-            { new: true }
-        );
-        
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            );
+        } else {
+            await User.updateOne(
+                { telegramId },
+                {
+                    $set: updateData,
+                    $inc: {
+                        'stats.totalSpins': 1,
+                        'stats.totalLosses': 1,
+                        'stats.totalLossAmount': winAmount
+                    }
+                }
+            );
         }
 
-        console.log('Updated user:', user);
-        res.json(user);
+        // Get updated user data
+        const updatedUser = await User.findOne({ telegramId });
+        console.log('User updated successfully:', updatedUser);
+        
+        res.json(updatedUser);
     } catch (error) {
         console.error('Error updating user:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ 
+            error: 'Server error',
+            details: error.message 
+        });
     }
 });
 
@@ -125,6 +151,9 @@ app.get('/api/user/:telegramId/stats', async (req, res) => {
         }
         
         res.json({
+            telegramId: user.telegramId,
+            username: user.username,
+            balance: user.balance,
             stats: user.stats,
             lastSpin: user.lastSpin,
             lastWin: user.lastWin,
@@ -133,7 +162,10 @@ app.get('/api/user/:telegramId/stats', async (req, res) => {
         });
     } catch (error) {
         console.error('Error getting user stats:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ 
+            error: 'Server error',
+            details: error.message 
+        });
     }
 });
 
