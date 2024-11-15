@@ -97,43 +97,29 @@ class PixelSlots {
         // Start spinning animation
         this.reels.forEach(reel => {
             reel.classList.add('spinning');
-            const content = reel.querySelector('.reel-content');
-            content.style.transitionDuration = '0s';
-            content.style.transform = 'translateY(0)';
         });
 
         // Play spin sound
         window.audioManager?.playSpinSound();
 
-        // Stop reels one by one
+        // Stop reels one by one with different delays
         for (let i = 0; i < this.reels.length; i++) {
-            await this.delay(400);
+            await this.delay(i === 0 ? 1000 : 500); // First reel spins longer
 
             const reel = this.reels[i];
-            const content = reel.querySelector('.reel-content');
-            const symbols = content.querySelectorAll('.symbol');
-
-            // Calculate final position
-            const symbolHeight = symbols[0].offsetHeight;
-            const finalIndex = this.symbols.indexOf(finalSymbols[i]);
-            const finalOffset = -symbolHeight * finalIndex;
-
-            // Smooth stop animation
-            content.style.transitionDuration = '0.5s';
-            content.style.transitionTimingFunction = 'cubic-bezier(0.5, 0, 0.5, 1)';
-            content.style.transform = `translateY(${finalOffset}px)`;
-
             reel.classList.remove('spinning');
+            
+            // Update visible symbol
+            const symbol = reel.querySelector('.symbol');
+            symbol.textContent = finalSymbols[i];
+
+            // Play stop sound and haptic
             window.audioManager?.playStopSound();
             this.webApp.HapticFeedback.impactOccurred('rigid');
-
-            // Update first and last symbols for next spin
-            symbols[0].textContent = finalSymbols[i];
-            symbols[symbols.length - 1].textContent = finalSymbols[i];
         }
 
-        // Check for wins
-        await this.delay(500);
+        // Check for wins after a short delay
+        await this.delay(300);
         this.checkWin(finalSymbols);
 
         this.isSpinning = false;
@@ -146,19 +132,22 @@ class PixelSlots {
     }
 
     checkWin(symbols) {
-        // Remove previous win animations
-        this.reels.forEach(reel => reel.classList.remove('win'));
+        // Remove previous win highlights
+        this.reels.forEach(reel => {
+            reel.classList.remove('win');
+            reel.querySelector('.symbol').style.transform = 'scale(1)';
+        });
 
         // Check for jackpot
         if (symbols.every(symbol => symbol === '🎰')) {
-            this.reels.forEach(reel => reel.classList.add('win'));
+            this.highlightWinningSymbols(symbols);
             this.handleJackpotWin();
             return;
         }
 
         // Check for regular win
         if (symbols.every(symbol => symbol === symbols[0])) {
-            this.reels.forEach(reel => reel.classList.add('win'));
+            this.highlightWinningSymbols(symbols);
             const multiplier = this.symbolValues[symbols[0]];
             const winAmount = this.bet * multiplier;
             this.handleWin(winAmount);
@@ -168,12 +157,7 @@ class PixelSlots {
         // Check for partial wins
         const matches = symbols.filter(symbol => symbol === symbols[0]).length;
         if (matches === 2) {
-            // Add win animation only to matching reels
-            symbols.forEach((symbol, index) => {
-                if (symbol === symbols[0]) {
-                    this.reels[index].classList.add('win');
-                }
-            });
+            this.highlightWinningSymbols(symbols);
             const multiplier = this.symbolValues[symbols[0]] / 2;
             const winAmount = this.bet * multiplier;
             this.handleWin(winAmount);
@@ -182,6 +166,18 @@ class PixelSlots {
 
         // Play lose sound
         window.audioManager?.playLoseSound();
+    }
+
+    highlightWinningSymbols(symbols) {
+        symbols.forEach((symbol, index) => {
+            if (symbol === symbols[0]) {
+                const reel = this.reels[index];
+                reel.classList.add('win');
+                const symbolEl = reel.querySelector('.symbol');
+                symbolEl.style.transform = 'scale(1.2)';
+                symbolEl.style.transition = 'transform 0.3s ease';
+            }
+        });
     }
 
     handleJackpotWin() {
