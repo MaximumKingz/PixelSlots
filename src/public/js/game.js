@@ -88,7 +88,6 @@ class PixelSlots {
             return;
         }
 
-        this.webApp.HapticFeedback.notificationOccurred('success');
         this.isSpinning = true;
         this.spinButton.disabled = true;
         this.updateBalance(this.balance - this.bet);
@@ -100,36 +99,39 @@ class PixelSlots {
         // Generate final symbols
         const finalSymbols = this.reels.map(() => this.getRandomSymbol());
 
-        // Start spinning animation
-        this.reels.forEach(reel => {
-            reel.classList.add('spinning');
-        });
+        try {
+            // Start spinning animation
+            this.reels.forEach(reel => reel.classList.add('spinning'));
+            window.audioManager?.playSpinSound();
 
-        // Play spin sound
-        window.audioManager?.playSpinSound();
+            // Stop reels one by one
+            for (let i = 0; i < this.reels.length; i++) {
+                await this.delay(i === 0 ? 1500 : 500);
+                
+                const reel = this.reels[i];
+                reel.classList.remove('spinning');
+                const symbol = reel.querySelector('.symbol');
+                if (symbol) {
+                    symbol.textContent = finalSymbols[i];
+                }
 
-        // Stop reels one by one
-        for (let i = 0; i < this.reels.length; i++) {
-            await this.delay(i === 0 ? 1500 : 500);
-            
-            const reel = this.reels[i];
-            reel.classList.remove('spinning');
-            reel.querySelector('.symbol').textContent = finalSymbols[i];
+                window.audioManager?.playStopSound();
+                this.webApp.HapticFeedback.impactOccurred('rigid');
+            }
 
-            window.audioManager?.playStopSound();
-            this.webApp.HapticFeedback.impactOccurred('rigid');
-        }
+            // Check for wins
+            await this.delay(300);
+            this.checkWin(finalSymbols);
+        } catch (error) {
+            console.error('Spin error:', error);
+        } finally {
+            this.isSpinning = false;
+            this.spinButton.disabled = false;
 
-        // Check for wins after a short delay
-        await this.delay(300);
-        this.checkWin(finalSymbols);
-
-        this.isSpinning = false;
-        this.spinButton.disabled = false;
-
-        // Continue auto play if active
-        if (this.autoPlayActive && this.balance >= this.bet) {
-            setTimeout(() => this.spin(), 1000);
+            // Continue auto play if active
+            if (this.autoPlayActive && this.balance >= this.bet) {
+                setTimeout(() => this.spin(), 1000);
+            }
         }
     }
 
@@ -200,46 +202,24 @@ class PixelSlots {
     }
 
     showWinDisplay(amount, isJackpot) {
-        // Ensure clean state
-        this.hideWinDisplay();
-        
         // Set content
         this.winAmount.textContent = `${amount.toFixed(8)} BTC`;
-        if (isJackpot) {
-            this.winOverlay.querySelector('h2').textContent = '🎉 JACKPOT! 🎉';
-        } else {
-            this.winOverlay.querySelector('h2').textContent = '🎉 BIG WIN! 🎉';
-        }
+        this.winOverlay.querySelector('h2').textContent = isJackpot ? '🎉 JACKPOT! 🎉' : '🎉 BIG WIN! 🎉';
 
-        // Show overlay with animation
-        requestAnimationFrame(() => {
-            this.winOverlay.classList.remove('hidden');
-            this.webApp.BackButton.show();
-            this.webApp.expand();
-            
-            // Haptic feedback
-            this.webApp.HapticFeedback.notificationOccurred('success');
-            
-            // Auto-hide after 5 seconds if autoplay is active
-            if (this.autoPlayActive) {
-                setTimeout(() => this.hideWinDisplay(), 5000);
-            }
-        });
+        // Show overlay
+        this.winOverlay.classList.remove('hidden');
+        this.webApp.BackButton.show();
+        this.webApp.HapticFeedback.notificationOccurred('success');
+
+        // Auto-hide after 5 seconds if autoplay is active
+        if (this.autoPlayActive) {
+            setTimeout(() => this.hideWinDisplay(), 5000);
+        }
     }
 
     hideWinDisplay() {
-        if (!this.winOverlay.classList.contains('hidden')) {
-            this.winOverlay.classList.add('hidden');
-            this.webApp.BackButton.hide();
-            
-            // Wait for animation to complete
-            setTimeout(() => {
-                if (this.winOverlay.classList.contains('hidden')) {
-                    this.winOverlay.querySelector('h2').textContent = '🎉 BIG WIN! 🎉';
-                    this.winAmount.textContent = '0.000 BTC';
-                }
-            }, 300);
-        }
+        this.winOverlay.classList.add('hidden');
+        this.webApp.BackButton.hide();
     }
 
     toggleAutoPlay() {
