@@ -19,56 +19,88 @@
 
         <div id="slot-machine">
             <div class="machine-frame">
-                <div class="reels-container">
-                    <div class="reel-box">
-                        <div class="reel" id="reel1">
+                <div class="reels-window">
+                    <div class="reels-container">
+                        <div class="reel-strip">
+                            <div class="symbol">🍒</div>
+                            <div class="symbol">🍋</div>
+                            <div class="symbol">🍊</div>
+                            <div class="symbol">💎</div>
+                            <div class="symbol">7️⃣</div>
+                            <div class="symbol">🎰</div>
+                        </div>
+                        <div class="reel-strip">
+                            <div class="symbol">🍋</div>
+                            <div class="symbol">🍊</div>
+                            <div class="symbol">💎</div>
+                            <div class="symbol">7️⃣</div>
+                            <div class="symbol">🎰</div>
                             <div class="symbol">🍒</div>
                         </div>
-                    </div>
-                    <div class="reel-box">
-                        <div class="reel" id="reel2">
+                        <div class="reel-strip">
+                            <div class="symbol">🍊</div>
+                            <div class="symbol">💎</div>
+                            <div class="symbol">7️⃣</div>
+                            <div class="symbol">🎰</div>
+                            <div class="symbol">🍒</div>
                             <div class="symbol">🍋</div>
                         </div>
                     </div>
-                    <div class="reel-box">
-                        <div class="reel" id="reel3">
-                            <div class="symbol">🍊</div>
-                        </div>
-                    </div>
+                    <div class="payline-top"></div>
+                    <div class="payline-middle"></div>
+                    <div class="payline-bottom"></div>
                 </div>
-                <div class="payline"></div>
             </div>
 
             <div class="game-controls">
-                <div class="balance-display">
-                    <span class="label">BALANCE:</span>
-                    <span id="balance">0.000 BTC</span>
-                </div>
-
-                <div class="bet-controls">
-                    <button id="decrease-bet" class="bet-button">-</button>
-                    <div class="bet-display">
-                        <span class="label">BET:</span>
-                        <span id="current-bet">0.001 BTC</span>
+                <div class="top-controls">
+                    <div class="balance-display">
+                        <span class="label">BALANCE:</span>
+                        <span id="balance">0.000 BTC</span>
                     </div>
-                    <button id="increase-bet" class="bet-button">+</button>
+                    <div class="bet-controls">
+                        <button id="decrease-bet" class="bet-button">-</button>
+                        <div class="bet-display">
+                            <span class="label">BET:</span>
+                            <span id="current-bet">0.001 BTC</span>
+                        </div>
+                        <button id="increase-bet" class="bet-button">+</button>
+                    </div>
                 </div>
 
-                <button id="spin-button" class="spin-button">SPIN</button>
-
-                <div class="auto-play">
-                    <button id="auto-play" class="auto-button">AUTO PLAY</button>
+                <div class="bottom-controls">
+                    <button id="max-bet" class="max-bet-button">MAX BET</button>
+                    <button id="spin-button" class="spin-button">SPIN</button>
+                    <button id="auto-play" class="auto-button">AUTO</button>
                 </div>
             </div>
         </div>
 
-        <div class="win-lines">
-            <div class="win-line">3x 🍒 = 2x</div>
-            <div class="win-line">3x 🍋 = 3x</div>
-            <div class="win-line">3x 🍊 = 4x</div>
-            <div class="win-line">3x 💎 = 10x</div>
-            <div class="win-line">3x 7️⃣ = 20x</div>
-            <div class="win-line">3x 🎰 = JACKPOT</div>
+        <div class="win-table">
+            <div class="win-row">
+                <div class="win-symbols">3x 🎰</div>
+                <div class="win-amount">JACKPOT</div>
+            </div>
+            <div class="win-row">
+                <div class="win-symbols">3x 7️⃣</div>
+                <div class="win-amount">20x</div>
+            </div>
+            <div class="win-row">
+                <div class="win-symbols">3x 💎</div>
+                <div class="win-amount">10x</div>
+            </div>
+            <div class="win-row">
+                <div class="win-symbols">3x 🍊</div>
+                <div class="win-amount">4x</div>
+            </div>
+            <div class="win-row">
+                <div class="win-symbols">3x 🍋</div>
+                <div class="win-amount">3x</div>
+            </div>
+            <div class="win-row">
+                <div class="win-symbols">3x 🍒</div>
+                <div class="win-amount">2x</div>
+            </div>
         </div>
     </div>
 

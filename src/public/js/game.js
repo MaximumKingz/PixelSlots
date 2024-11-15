@@ -13,17 +13,38 @@ class PixelSlots {
         this.bet = 0.001;
         this.jackpot = 10.0;
         this.isSpinning = false;
-        this.reels = Array(3).fill(null);
-        this.spinDuration = 2000;
+        this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
-
+        
+        // Initialize game
         this.initializeGame();
+        this.setupTelegram();
+    }
+
+    setupTelegram() {
+        // Expand to full height
+        this.webApp.expand();
+
+        // Set correct theme
+        document.documentElement.style.setProperty('--tg-theme-bg-color', this.webApp.backgroundColor);
+        document.documentElement.style.setProperty('--tg-theme-text-color', this.webApp.textColor);
+        document.documentElement.style.setProperty('--tg-theme-button-color', this.webApp.buttonColor);
+        document.documentElement.style.setProperty('--tg-theme-button-text-color', this.webApp.buttonTextColor);
+
+        // Handle back button
+        this.webApp.BackButton.onClick(() => {
+            if (document.querySelector('.win-overlay:not(.hidden)')) {
+                this.hideWinDisplay();
+            }
+        });
     }
 
     initializeGame() {
         // Initialize UI elements
-        this.reelElements = Array.from(document.querySelectorAll('.reel'));
+        this.reelStrips = Array.from(document.querySelectorAll('.reel-strip'));
         this.spinButton = document.getElementById('spin-button');
+        this.autoPlayButton = document.getElementById('auto-play');
+        this.maxBetButton = document.getElementById('max-bet');
         this.decreaseBetButton = document.getElementById('decrease-bet');
         this.increaseBetButton = document.getElementById('increase-bet');
         this.currentBetDisplay = document.getElementById('current-bet');
@@ -40,19 +61,29 @@ class PixelSlots {
 
         // Add event listeners
         this.spinButton.addEventListener('click', () => this.spin());
+        this.autoPlayButton.addEventListener('click', () => this.toggleAutoPlay());
+        this.maxBetButton.addEventListener('click', () => this.setMaxBet());
         this.decreaseBetButton.addEventListener('click', () => this.adjustBet(-0.001));
         this.increaseBetButton.addEventListener('click', () => this.adjustBet(0.001));
         this.collectWinButton.addEventListener('click', () => this.hideWinDisplay());
 
-        // Initialize Telegram WebApp
-        this.webApp.ready();
-        this.webApp.expand();
-
-        // Set initial symbols
-        this.reelElements.forEach((reel, index) => {
-            this.reels[index] = this.getRandomSymbol();
-            reel.textContent = this.reels[index];
+        // Initialize reel symbols
+        this.reelStrips.forEach(strip => {
+            this.populateReelStrip(strip);
         });
+    }
+
+    populateReelStrip(strip) {
+        // Clear existing symbols
+        strip.innerHTML = '';
+        
+        // Add symbols
+        for (let i = 0; i < 20; i++) {
+            const symbol = document.createElement('div');
+            symbol.className = 'symbol';
+            symbol.textContent = this.getRandomSymbol();
+            strip.appendChild(symbol);
+        }
     }
 
     getRandomSymbol() {
@@ -60,8 +91,12 @@ class PixelSlots {
     }
 
     async spin() {
-        if (this.isSpinning || this.balance < this.bet) return;
+        if (this.isSpinning || this.balance < this.bet) {
+            this.webApp.HapticFeedback.notificationOccurred('error');
+            return;
+        }
 
+        this.webApp.HapticFeedback.notificationOccurred('success');
         this.isSpinning = true;
         this.spinButton.disabled = true;
         this.updateBalance(this.balance - this.bet);
@@ -71,35 +106,52 @@ class PixelSlots {
         this.updateJackpot(this.jackpot);
 
         // Start spinning animation
-        this.reelElements.forEach(reel => reel.classList.add('spinning'));
+        this.reelStrips.forEach(strip => {
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateY(0)';
+        });
 
-        // Generate new symbols
-        const newSymbols = this.reels.map(() => this.getRandomSymbol());
+        // Force reflow
+        this.reelStrips[0].offsetHeight;
 
-        // Stop reels one by one
-        for (let i = 0; i < this.reelElements.length; i++) {
-            await this.delay(this.spinDuration / 3);
-            this.reelElements[i].classList.remove('spinning');
-            this.reels[i] = newSymbols[i];
-            this.reelElements[i].textContent = this.reels[i];
-            this.playStopSound();
-        }
+        // Add spinning animation
+        this.reelStrips.forEach((strip, index) => {
+            strip.style.transition = `transform ${2 + index * 0.5}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
+            strip.style.transform = `translateY(${-(Math.floor(Math.random() * 5) + 10) * 100}%)`;
+        });
+
+        // Wait for spinning to complete
+        await this.delay(3500);
+
+        // Generate final symbols
+        const finalSymbols = this.reelStrips.map(() => this.getRandomSymbol());
+        
+        // Update reel positions to show final symbols
+        this.reelStrips.forEach((strip, index) => {
+            const symbols = strip.querySelectorAll('.symbol');
+            symbols.forEach(symbol => symbol.textContent = finalSymbols[index]);
+        });
 
         // Check for wins
-        this.checkWin(newSymbols);
+        this.checkWin(finalSymbols);
 
         this.isSpinning = false;
         this.spinButton.disabled = false;
+
+        // Continue auto play if active
+        if (this.autoPlayActive && this.balance >= this.bet) {
+            setTimeout(() => this.spin(), 1000);
+        }
     }
 
     checkWin(symbols) {
-        // Check for jackpot (all symbols match and are 🎰)
+        // Check for jackpot
         if (symbols.every(symbol => symbol === '🎰')) {
             this.handleJackpotWin();
             return;
         }
 
-        // Check for regular win (all symbols match)
+        // Check for regular win
         if (symbols.every(symbol => symbol === symbols[0])) {
             const multiplier = this.symbolValues[symbols[0]];
             const winAmount = this.bet * multiplier;
@@ -107,7 +159,7 @@ class PixelSlots {
             return;
         }
 
-        // Check for partial wins (two matching symbols)
+        // Check for partial wins
         const matches = symbols.filter(symbol => symbol === symbols[0]).length;
         if (matches === 2) {
             const multiplier = this.symbolValues[symbols[0]] / 2;
@@ -116,36 +168,85 @@ class PixelSlots {
             return;
         }
 
-        this.playLoseSound();
+        // Play lose sound
+        window.audioManager?.playLoseSound();
     }
 
     handleJackpotWin() {
         const winAmount = this.jackpot;
         this.updateBalance(this.balance + winAmount);
-        this.jackpot = 10.0; // Reset jackpot
+        this.jackpot = 10.0;
         this.updateJackpot(this.jackpot);
         this.showWinDisplay(winAmount, true);
-        this.playJackpotSound();
-        this.createParticleEffect();
+        window.audioManager?.playJackpotSound();
+        this.webApp.HapticFeedback.notificationOccurred('success');
     }
 
     handleWin(amount) {
         this.updateBalance(this.balance + amount);
         this.showWinDisplay(amount, false);
-        this.playWinSound();
-        this.createParticleEffect();
+        window.audioManager?.playWinSound(amount);
+        this.webApp.HapticFeedback.notificationOccurred('success');
     }
 
     showWinDisplay(amount, isJackpot) {
+        // Ensure clean state
+        this.hideWinDisplay();
+        
+        // Set content
         this.winAmount.textContent = `${amount.toFixed(8)} BTC`;
-        this.winOverlay.classList.remove('hidden');
         if (isJackpot) {
             this.winOverlay.querySelector('h2').textContent = '🎉 JACKPOT! 🎉';
+        } else {
+            this.winOverlay.querySelector('h2').textContent = '🎉 BIG WIN! 🎉';
         }
+
+        // Show overlay with animation
+        requestAnimationFrame(() => {
+            this.winOverlay.classList.remove('hidden');
+            this.webApp.BackButton.show();
+            this.webApp.expand();
+            
+            // Haptic feedback
+            this.webApp.HapticFeedback.notificationOccurred('success');
+            
+            // Auto-hide after 5 seconds if autoplay is active
+            if (this.autoPlayActive) {
+                setTimeout(() => this.hideWinDisplay(), 5000);
+            }
+        });
     }
 
     hideWinDisplay() {
-        this.winOverlay.classList.add('hidden');
+        if (!this.winOverlay.classList.contains('hidden')) {
+            this.winOverlay.classList.add('hidden');
+            this.webApp.BackButton.hide();
+            
+            // Wait for animation to complete
+            setTimeout(() => {
+                if (this.winOverlay.classList.contains('hidden')) {
+                    this.winOverlay.querySelector('h2').textContent = '🎉 BIG WIN! 🎉';
+                    this.winAmount.textContent = '0.000 BTC';
+                }
+            }, 300);
+        }
+    }
+
+    toggleAutoPlay() {
+        this.autoPlayActive = !this.autoPlayActive;
+        this.autoPlayButton.classList.toggle('active');
+        if (this.autoPlayActive && !this.isSpinning && this.balance >= this.bet) {
+            this.spin();
+        }
+    }
+
+    setMaxBet() {
+        const maxPossibleBet = Math.floor(this.balance * 1000) / 1000;
+        if (maxPossibleBet !== this.bet) {
+            this.bet = maxPossibleBet;
+            this.updateBetDisplay();
+            this.webApp.HapticFeedback.notificationOccurred('success');
+        }
     }
 
     adjustBet(amount) {
@@ -153,6 +254,7 @@ class PixelSlots {
         if (newBet !== this.bet) {
             this.bet = newBet;
             this.updateBetDisplay();
+            this.webApp.HapticFeedback.notificationOccurred('success');
         }
     }
 
@@ -168,47 +270,6 @@ class PixelSlots {
     updateJackpot(amount) {
         this.jackpot = amount;
         this.jackpotDisplay.textContent = `${this.jackpot.toFixed(3)} BTC`;
-    }
-
-    createParticleEffect() {
-        for (let i = 0; i < 50; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.textContent = ['💰', '⭐', '✨'][Math.floor(Math.random() * 3)];
-            
-            const angle = Math.random() * Math.PI * 2;
-            const velocity = 100 + Math.random() * 100;
-            const dx = Math.cos(angle) * velocity;
-            const dy = Math.sin(angle) * velocity;
-            const rotate = Math.random() * 360;
-
-            particle.style.setProperty('--dx', `${dx}px`);
-            particle.style.setProperty('--dy', `${dy}px`);
-            particle.style.setProperty('--rotate', `${rotate}deg`);
-
-            document.body.appendChild(particle);
-            setTimeout(() => particle.remove(), 1000);
-        }
-    }
-
-    playSpinSound() {
-        // Implement sound effects
-    }
-
-    playStopSound() {
-        // Implement sound effects
-    }
-
-    playWinSound() {
-        // Implement sound effects
-    }
-
-    playJackpotSound() {
-        // Implement sound effects
-    }
-
-    playLoseSound() {
-        // Implement sound effects
     }
 
     delay(ms) {
