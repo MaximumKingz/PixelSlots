@@ -1,12 +1,3 @@
-// Import Supabase client
-import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
-
-// Initialize Supabase client
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_KEY';
-const supabaseSecret = 'YOUR_SUPABASE_SECRET';
-const supabase = createClient(supabaseUrl, supabaseKey, supabaseSecret);
-
 class PixelSlots {
     constructor() {
         console.log('Starting game initialization...');
@@ -52,9 +43,6 @@ class PixelSlots {
         this.jackpot = 1000.00;
         this.isSpinning = false;
         this.autoPlayActive = false;
-        
-        // Supabase client
-        this.supabase = supabase;
 
         // Initialize UI first
         this.initializeUI();
@@ -84,7 +72,7 @@ class PixelSlots {
             console.log('Username:', username);
             
             // Get user data from Supabase
-            let { data: userData, error } = await this.supabase
+            let { data: userData, error } = await window.supabase
                 .from('users')
                 .select('*')
                 .eq('telegram_id', telegramId)
@@ -110,7 +98,7 @@ class PixelSlots {
                 };
 
                 console.log('Creating new user with data:', newUser);
-                const { data, error: insertError } = await this.supabase
+                const { data, error: insertError } = await window.supabase
                     .from('users')
                     .insert([newUser])
                     .select()
@@ -160,7 +148,7 @@ class PixelSlots {
             console.log('Current Balance:', this.balance);
             
             // Get current data
-            let { data: userData, error } = await this.supabase
+            let { data: userData, error } = await window.supabase
                 .from('users')
                 .select('*')
                 .eq('telegram_id', telegramId)
@@ -192,7 +180,7 @@ class PixelSlots {
 
             // Save to Supabase
             console.log('Saving updates:', updates);
-            const { data: updatedData, error: updateError } = await this.supabase
+            const { data: updatedData, error: updateError } = await window.supabase
                 .from('users')
                 .update(updates)
                 .eq('telegram_id', telegramId)
