@@ -2,12 +2,13 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-    background: #1a1a1a;
+    font-family: 'Press Start 2P', monospace;
+    background: #0f0f0f;
     color: #fff;
     text-align: center;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    line-height: 1.5;
 }
 
 /* Loading Screen */
@@ -17,7 +18,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: #1a1a1a;
+    background: #0f0f0f;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -25,22 +26,28 @@ body {
     z-index: 2000;
     text-align: center;
     padding: 20px;
+    font-size: 12px;
 }
 
 .loader {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #333;
-    border-radius: 50%;
-    border-top-color: #4CAF50;
-    animation: spin 1s linear infinite;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #1a1a1a;
+    border-radius: 0;
+    border-top-color: #00ff00;
+    animation: spin 1s steps(8) infinite;
+    margin-bottom: 20px;
 }
 
 /* Game Container */
 #game-container {
     max-width: 800px;
-    margin: 0 auto;
+    margin: 20px auto;
     padding: 20px;
+    background: #1a1a1a;
+    border: 4px solid #00ff00;
+    box-shadow: 0 0 0 4px #1a1a1a, 0 0 0 8px #00ff00;
+    image-rendering: pixelated;
 }
 
 /* Game Header */
@@ -49,21 +56,17 @@ body {
     justify-content: space-between;
     margin-bottom: 20px;
     padding: 10px;
-    background: #2a2a2a;
-    border: 4px solid #4CAF50;
-    border-radius: 8px;
-    box-shadow: 0 4px 0 #1a1a1a;
+    background: #000;
+    border: 2px solid #00ff00;
+    font-size: 12px;
 }
 
 /* Balance Display */
 #balance-container, #jackpot-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
     background: #1a1a1a;
-    border: 2px solid #4CAF50;
-    border-radius: 4px;
+    padding: 10px;
+    border: 2px solid #00ff00;
+    text-shadow: 2px 2px #000;
 }
 
 /* Slot Machine */
@@ -73,22 +76,21 @@ body {
     gap: 10px;
     margin: 20px 0;
     padding: 20px;
-    background: #2a2a2a;
-    border: 4px solid #4CAF50;
-    border-radius: 8px;
-    box-shadow: 0 4px 0 #1a1a1a;
+    background: #000;
+    border: 4px solid #00ff00;
+    box-shadow: inset 0 0 10px #00ff00;
 }
 
 .reel {
     width: 80px;
     height: 80px;
     background: #1a1a1a;
-    border: 2px solid #4CAF50;
-    border-radius: 4px;
+    border: 2px solid #00ff00;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: inset 0 0 5px #00ff00;
 }
 
 /* Controls */
@@ -105,34 +107,38 @@ body {
     justify-content: center;
     gap: 10px;
     grid-column: span 2;
+    font-size: 12px;
 }
 
 button {
     padding: 10px 20px;
-    font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
-    font-size: 14px;
-    color: white;
-    background: #4CAF50;
-    border: none;
-    border-radius: 4px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: #00ff00;
+    background: #000;
+    border: 2px solid #00ff00;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 0 #1a1a1a;
+    transition: all 0.2s steps(4);
     text-transform: uppercase;
+    text-shadow: 2px 2px #000;
+    box-shadow: 3px 3px #00ff00;
 }
 
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
 button:not(:disabled):hover {
-    transform: translateY(2px);
-    box-shadow: 0 2px 0 #1a1a1a;
+    background: #00ff00;
+    color: #000;
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px #00ff00;
 }
 
 button:not(:disabled):active {
-    transform: translateY(4px);
+    transform: translate(3px, 3px);
     box-shadow: none;
 }
 
@@ -140,17 +146,16 @@ button:not(:disabled):active {
 #win-table {
     margin: 20px 0;
     padding: 20px;
-    background: #2a2a2a;
-    border: 4px solid #4CAF50;
-    border-radius: 8px;
-    box-shadow: 0 4px 0 #1a1a1a;
+    background: #000;
+    border: 2px solid #00ff00;
+    font-size: 12px;
 }
 
 .win-row {
     display: flex;
     justify-content: space-between;
     padding: 10px;
-    border-bottom: 1px solid #4CAF50;
+    border-bottom: 1px solid #00ff00;
 }
 
 .win-row:last-child {
@@ -165,7 +170,7 @@ button:not(:disabled):active {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -173,17 +178,19 @@ button:not(:disabled):active {
 
 #win-content {
     padding: 40px;
-    background: #2a2a2a;
-    border: 4px solid #4CAF50;
-    border-radius: 8px;
+    background: #000;
+    border: 4px solid #00ff00;
+    box-shadow: 0 0 20px #00ff00;
     text-align: center;
-    animation: pop 0.3s ease-out;
+    animation: glitch 0.3s steps(2) infinite;
 }
 
 #win-amount {
     font-size: 24px;
-    color: #4CAF50;
+    color: #00ff00;
     margin: 20px 0;
+    text-shadow: 2px 2px #000;
+    animation: pulse 1s steps(2) infinite;
 }
 
 /* Animations */
@@ -192,9 +199,18 @@ button:not(:disabled):active {
     100% { transform: rotate(360deg); }
 }
 
-@keyframes pop {
-    0% { transform: scale(0.8); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+@keyframes glitch {
+    0% { transform: translate(0); }
+    25% { transform: translate(-2px, 2px); }
+    50% { transform: translate(2px, -2px); }
+    75% { transform: translate(-2px, -2px); }
+    100% { transform: translate(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 /* Spinning Animation */
@@ -204,27 +220,27 @@ button:not(:disabled):active {
 }
 
 .reel.spinning .symbol {
-    animation: spin-reel 0.5s linear infinite;
+    animation: spin-reel 0.5s steps(10) infinite;
 }
 
 .reel .symbol {
     font-size: 48px;
     line-height: 60px;
     text-align: center;
-    transition: transform 0.2s ease-out;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    transition: transform 0.2s steps(5);
+    filter: drop-shadow(0 0 5px #00ff00);
 }
 
 /* Button States */
 .active {
-    background: #45a049 !important;
-    color: white !important;
+    background: #00ff00 !important;
+    color: #000 !important;
 }
 
 /* Responsive Design */
 @media (max-width: 600px) {
     #game-container {
+        margin: 10px;
         padding: 10px;
     }
 
@@ -248,7 +264,7 @@ button:not(:disabled):active {
 
     button {
         padding: 8px 16px;
-        font-size: 12px;
+        font-size: 10px;
     }
 }
 
