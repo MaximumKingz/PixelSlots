@@ -19,128 +19,168 @@ class PixelSlots {
         this.jackpot = 1000.00;
         this.isSpinning = false;
         this.autoPlayActive = false;
-        this.webApp = window.Telegram.WebApp;
         
-        // Use Strato API URL
-        this.apiUrl = 'https://maximumkingz.de/pixelslots/api.php';
-        
-        console.log('Game initialized');
-        console.log('API URL:', this.apiUrl);
-        console.log('Telegram WebApp:', this.webApp);
-        console.log('Telegram User:', this.webApp.initDataUnsafe?.user);
-        console.log('Telegram User ID:', this.webApp.initDataUnsafe?.user?.id);
+        // Initialize Telegram WebApp
+        this.webApp = window.Telegram?.WebApp;
+        if (!this.webApp) {
+            console.error('Telegram WebApp not found!');
+            alert('Please open this game in Telegram!');
+            return;
+        }
 
-        // Initialize game immediately
+        // Log Telegram data
+        console.log('=== TELEGRAM DATA ===');
+        console.log('WebApp:', this.webApp);
+        console.log('User:', this.webApp.initDataUnsafe?.user);
+        console.log('User ID:', this.webApp.initDataUnsafe?.user?.id);
+        console.log('Username:', this.webApp.initDataUnsafe?.user?.username);
+        
+        // API URL
+        this.apiUrl = 'https://maximumkingz.de/pixelslots/api.php';
+        console.log('API URL:', this.apiUrl);
+
+        // Initialize game
         this.setupTelegram();
         this.initializeGame();
     }
 
     async loadUserData() {
         try {
-            if (!this.webApp.initDataUnsafe?.user?.id) {
-                console.error('No Telegram user ID found');
+            // Check Telegram data
+            if (!this.webApp?.initDataUnsafe?.user?.id) {
+                console.error('No Telegram user data!', {
+                    webApp: this.webApp,
+                    initDataUnsafe: this.webApp?.initDataUnsafe,
+                    user: this.webApp?.initDataUnsafe?.user
+                });
+                alert('Please open this game in Telegram!');
                 return null;
             }
 
+            // Get user info
             const username = this.webApp.initDataUnsafe.user.username || '';
             const telegramId = this.webApp.initDataUnsafe.user.id.toString();
             
-            console.log('Loading data for user:', {
-                telegramId,
-                username,
-                url: `${this.apiUrl}?telegram_id=${telegramId}&username=${username}`
-            });
+            console.log('=== LOADING USER DATA ===');
+            console.log('Telegram ID:', telegramId);
+            console.log('Username:', username);
             
-            const response = await fetch(
-                `${this.apiUrl}?telegram_id=${telegramId}&username=${username}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                }
-            );
+            // Make API request
+            const url = `${this.apiUrl}?telegram_id=${telegramId}&username=${username}`;
+            console.log('API URL:', url);
 
-            console.log('API Response Status:', response.status);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('API Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                headers: Object.fromEntries(response.headers.entries())
+            });
+
+            // Get response text
             const responseText = await response.text();
             console.log('API Response Text:', responseText);
 
+            // Parse response
             let userData;
             try {
                 userData = JSON.parse(responseText);
+                console.log('Parsed User Data:', userData);
             } catch (e) {
                 console.error('Failed to parse API response:', e);
+                alert('Error loading user data. Please try again.');
                 return null;
             }
 
-            console.log('API Response Parsed:', userData);
-            
-            if (userData && typeof userData.balance === 'number') {
-                await this.updateBalance(userData.balance);
-                console.log('Updated balance to:', userData.balance);
-            } else {
-                console.error('Invalid user data received:', userData);
+            // Check user data
+            if (!userData || typeof userData.balance !== 'number') {
+                console.error('Invalid user data:', userData);
+                alert('Invalid user data received. Please try again.');
                 return null;
             }
+
+            // Update balance
+            await this.updateBalance(userData.balance);
+            console.log('Updated Balance:', this.balance);
 
             return userData;
         } catch (error) {
             console.error('Error loading user data:', error);
+            alert('Error: ' + error.message);
             return null;
         }
     }
 
     async saveUserData(winAmount = 0, isWin = false, isJackpot = false) {
         try {
-            if (!this.webApp.initDataUnsafe?.user?.id) {
-                console.error('No Telegram user ID found');
-                return;
+            // Check Telegram data
+            if (!this.webApp?.initDataUnsafe?.user?.id) {
+                console.error('No Telegram user data!');
+                alert('Please open this game in Telegram!');
+                return null;
             }
 
+            // Get user info
             const telegramId = this.webApp.initDataUnsafe.user.id.toString();
+            
+            console.log('=== SAVING USER DATA ===');
+            console.log('Telegram ID:', telegramId);
+            
+            // Prepare data
             const data = {
                 balance: this.balance,
                 isWin,
                 winAmount,
                 isJackpot
             };
+            console.log('Save Data:', data);
 
-            console.log('Saving data for user:', {
-                telegramId,
-                data,
-                url: `${this.apiUrl}?telegram_id=${telegramId}`
+            // Make API request
+            const url = `${this.apiUrl}?telegram_id=${telegramId}`;
+            console.log('API URL:', url);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
 
-            const response = await fetch(
-                `${this.apiUrl}?telegram_id=${telegramId}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                }
-            );
+            console.log('API Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                headers: Object.fromEntries(response.headers.entries())
+            });
 
-            console.log('API Save Response Status:', response.status);
+            // Get response text
             const responseText = await response.text();
-            console.log('API Save Response Text:', responseText);
+            console.log('API Response Text:', responseText);
 
+            // Parse response
             let userData;
             try {
                 userData = JSON.parse(responseText);
+                console.log('Parsed Save Response:', userData);
             } catch (e) {
                 console.error('Failed to parse API save response:', e);
+                alert('Error saving game data. Please try again.');
                 return null;
             }
 
-            console.log('API Save Response Parsed:', userData);
             return userData;
         } catch (error) {
             console.error('Error saving user data:', error);
+            alert('Error: ' + error.message);
             await this.loadUserData();
+            return null;
         }
     }
 
