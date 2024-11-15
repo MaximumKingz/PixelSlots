@@ -21,8 +21,8 @@ class PixelSlots {
         this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
         
-        // Use production server URL when deployed
-        this.apiBaseUrl = 'https://pixel-slots-server.herokuapp.com/api';
+        // Use production API URL
+        this.apiBaseUrl = 'https://maximumkingz.de/pixelslots/api';
 
         this.setupTelegram();
         this.initializeGame();
@@ -44,7 +44,7 @@ class PixelSlots {
             });
             
             const response = await fetch(
-                `${this.apiBaseUrl}/user/${telegramId}?username=${username}`,
+                `${this.apiBaseUrl}/user.php?telegram_id=${telegramId}&username=${username}`,
                 {
                     method: 'GET',
                     headers: {
@@ -92,7 +92,7 @@ class PixelSlots {
             });
 
             const response = await fetch(
-                `${this.apiBaseUrl}/user/${telegramId}/update`,
+                `${this.apiBaseUrl}/user.php?telegram_id=${telegramId}`,
                 {
                     method: 'POST',
                     headers: {

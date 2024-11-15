@@ -1,171 +1,220 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
+const mysql = require('mysql2/promise');
 const cors = require('cors');
-const User = require('./models/User');
 
 const app = express();
 
-// Allow requests from GitHub Pages
+// Allow requests from GitHub Pages and local development
 app.use(cors({
-    origin: ['https://maximumkingz.github.io', 'http://localhost:3000'],
+    origin: ['https://maximumkingz.github.io', 'http://localhost:3000', 'http://localhost:8080'],
     methods: ['GET', 'POST'],
     credentials: true
 }));
 
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
+// Create MySQL connection pool
+const pool = mysql.createPool({
+    host: 'rdbms.strato.de',
+    user: 'dbu1342085',
+    password: 'KinGKonG1989!',
+    database: 'dbs13505497',
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Test database connection
+async function testConnection() {
+    try {
+        const connection = await pool.getConnection();
+        console.log('Successfully connected to MySQL database');
+        connection.release();
+        return true;
+    } catch (error) {
+        console.error('Error connecting to database:', error);
+        return false;
+    }
+}
+
+// Initialize database on startup
+testConnection().catch(console.error);
 
 // Basic health check
-app.get('/', (req, res) => {
-    res.json({ status: 'Server is running' });
+app.get('/', async (req, res) => {
+    try {
+        await testConnection();
+        res.json({ status: 'Server is running', database: 'Connected' });
+    } catch (error) {
+        res.status(500).json({ status: 'Server is running', database: 'Disconnected', error: error.message });
+    }
 });
 
 // Get or create user data
 app.get('/api/user/:telegramId', async (req, res) => {
+    let connection;
     try {
         const { telegramId } = req.params;
-        console.log('Looking for user:', telegramId);
+        const username = req.query.username || '';
 
-        // First, try to find existing user
-        let user = await User.findOne({ telegramId });
-        
-        if (user) {
-            console.log('Found existing user:', user);
-            return res.json(user);
+        console.log('Looking for user:', { telegramId, username });
+
+        connection = await pool.getConnection();
+
+        // Try to find existing user
+        const [users] = await connection.query(
+            'SELECT * FROM users WHERE telegram_id = ?',
+            [telegramId]
+        );
+
+        if (users.length > 0) {
+            console.log('Found existing user:', users[0]);
+            connection.release();
+            return res.json(users[0]);
         }
 
-        // If no user exists, create a new one with $10 bonus
+        // Create new user if not exists
         console.log('Creating new user with $10 bonus');
-        user = new User({
-            telegramId,
-            username: req.query.username || '',
-            balance: 10.00,
-            hasReceivedBonus: true,
-            created: Date.now(),
-            lastUpdated: Date.now(),
-            stats: {
-                totalSpins: 0,
-                totalWins: 0,
-                totalLosses: 0,
-                biggestWin: 0,
-                totalWinAmount: 0,
-                totalLossAmount: 0,
-                jackpotsWon: 0
-            }
-        });
+        await connection.beginTransaction();
 
-        // Save the new user
-        await user.save();
-        console.log('New user created successfully:', user);
-        
-        res.json(user);
+        await connection.query(
+            'INSERT INTO users (telegram_id, username, balance, has_received_bonus) VALUES (?, ?, 10.00, TRUE)',
+            [telegramId, username]
+        );
+
+        const [newUser] = await connection.query(
+            'SELECT * FROM users WHERE telegram_id = ?',
+            [telegramId]
+        );
+
+        await connection.commit();
+        console.log('New user created:', newUser[0]);
+        res.json(newUser[0]);
     } catch (error) {
+        if (connection) {
+            await connection.rollback();
+            connection.release();
+        }
         console.error('Error in user creation/retrieval:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Server error',
-            details: error.message 
+            details: error.message
         });
+    } finally {
+        if (connection) connection.release();
     }
 });
 
 // Update user balance and stats
 app.post('/api/user/:telegramId/update', async (req, res) => {
+    let connection;
     try {
         const { telegramId } = req.params;
         const { balance, isWin, winAmount, isJackpot } = req.body;
 
-        console.log('Updating user:', telegramId, 'with balance:', balance);
-        
-        // Find user first
-        const user = await User.findOne({ telegramId });
-        if (!user) {
-            console.error('User not found:', telegramId);
+        console.log('Updating user:', { telegramId, balance, isWin, winAmount, isJackpot });
+
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        // Update user data
+        const updateQuery = `
+            UPDATE users 
+            SET 
+                balance = ?,
+                total_spins = total_spins + 1,
+                ${isWin ? `
+                    total_wins = total_wins + 1,
+                    total_win_amount = total_win_amount + ?,
+                    biggest_win = GREATEST(biggest_win, ?),
+                    last_win = CURRENT_TIMESTAMP,
+                    ${isJackpot ? 'jackpots_won = jackpots_won + 1,' : ''}
+                ` : `
+                    total_losses = total_losses + 1,
+                    total_loss_amount = total_loss_amount + ?,
+                `}
+                last_spin = CURRENT_TIMESTAMP
+            WHERE telegram_id = ?
+        `;
+
+        await connection.query(
+            updateQuery,
+            isWin ? [balance, winAmount, winAmount, telegramId] : [balance, winAmount, telegramId]
+        );
+
+        // Get updated user data
+        const [users] = await connection.query(
+            'SELECT * FROM users WHERE telegram_id = ?',
+            [telegramId]
+        );
+
+        if (users.length === 0) {
+            await connection.rollback();
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Prepare update data
-        const updateData = {
-            balance,
-            lastUpdated: Date.now(),
-            lastSpin: Date.now()
-        };
-
-        if (isWin) {
-            updateData.lastWin = Date.now();
-            await User.updateOne(
-                { telegramId },
-                {
-                    $set: updateData,
-                    $inc: {
-                        'stats.totalSpins': 1,
-                        'stats.totalWins': 1,
-                        'stats.totalWinAmount': winAmount,
-                        'stats.jackpotsWon': isJackpot ? 1 : 0
-                    },
-                    $max: {
-                        'stats.biggestWin': winAmount
-                    }
-                }
-            );
-        } else {
-            await User.updateOne(
-                { telegramId },
-                {
-                    $set: updateData,
-                    $inc: {
-                        'stats.totalSpins': 1,
-                        'stats.totalLosses': 1,
-                        'stats.totalLossAmount': winAmount
-                    }
-                }
-            );
-        }
-
-        // Get updated user data
-        const updatedUser = await User.findOne({ telegramId });
-        console.log('User updated successfully:', updatedUser);
-        
-        res.json(updatedUser);
+        await connection.commit();
+        console.log('User updated successfully:', users[0]);
+        res.json(users[0]);
     } catch (error) {
+        if (connection) {
+            await connection.rollback();
+        }
         console.error('Error updating user:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Server error',
-            details: error.message 
+            details: error.message
         });
+    } finally {
+        if (connection) connection.release();
     }
 });
 
 // Get user statistics
 app.get('/api/user/:telegramId/stats', async (req, res) => {
+    let connection;
     try {
         const { telegramId } = req.params;
-        const user = await User.findOne({ telegramId });
         
-        if (!user) {
+        connection = await pool.getConnection();
+        const [users] = await connection.query(
+            'SELECT * FROM users WHERE telegram_id = ?',
+            [telegramId]
+        );
+
+        if (users.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
-        
+
+        const user = users[0];
         res.json({
-            telegramId: user.telegramId,
+            telegramId: user.telegram_id,
             username: user.username,
-            balance: user.balance,
-            stats: user.stats,
-            lastSpin: user.lastSpin,
-            lastWin: user.lastWin,
-            created: user.created,
-            hasReceivedBonus: user.hasReceivedBonus
+            balance: parseFloat(user.balance),
+            stats: {
+                totalSpins: user.total_spins,
+                totalWins: user.total_wins,
+                totalLosses: user.total_losses,
+                biggestWin: parseFloat(user.biggest_win),
+                totalWinAmount: parseFloat(user.total_win_amount),
+                totalLossAmount: parseFloat(user.total_loss_amount),
+                jackpotsWon: user.jackpots_won
+            },
+            lastSpin: user.last_spin,
+            lastWin: user.last_win,
+            created: user.created_at,
+            hasReceivedBonus: Boolean(user.has_received_bonus)
         });
     } catch (error) {
         console.error('Error getting user stats:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Server error',
-            details: error.message 
+            details: error.message
         });
+    } finally {
+        if (connection) connection.release();
     }
 });
 
