@@ -29,12 +29,18 @@ class PixelSlots {
         document.documentElement.style.setProperty('--tg-theme-text-color', this.webApp.textColor);
         document.documentElement.style.setProperty('--tg-theme-button-color', this.webApp.buttonColor);
         document.documentElement.style.setProperty('--tg-theme-button-text-color', this.webApp.buttonTextColor);
+        document.documentElement.style.setProperty('--tg-viewport-height', `${this.webApp.viewportHeight}px`);
 
         // Handle back button
         this.webApp.BackButton.onClick(() => {
             if (document.querySelector('.win-overlay:not(.hidden)')) {
                 this.hideWinDisplay();
             }
+        });
+
+        // Handle viewport height changes
+        this.webApp.onEvent('viewportChanged', () => {
+            document.documentElement.style.setProperty('--tg-viewport-height', `${this.webApp.viewportHeight}px`);
         });
     }
 
@@ -102,18 +108,14 @@ class PixelSlots {
         // Play spin sound
         window.audioManager?.playSpinSound();
 
-        // Stop reels one by one with different delays
+        // Stop reels one by one
         for (let i = 0; i < this.reels.length; i++) {
-            await this.delay(i === 0 ? 1000 : 500); // First reel spins longer
-
+            await this.delay(i === 0 ? 1500 : 500);
+            
             const reel = this.reels[i];
             reel.classList.remove('spinning');
-            
-            // Update visible symbol
-            const symbol = reel.querySelector('.symbol');
-            symbol.textContent = finalSymbols[i];
+            reel.querySelector('.symbol').textContent = finalSymbols[i];
 
-            // Play stop sound and haptic
             window.audioManager?.playStopSound();
             this.webApp.HapticFeedback.impactOccurred('rigid');
         }
