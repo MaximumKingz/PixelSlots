@@ -21,6 +21,8 @@ const analytics = logEvent;
 
 class PixelSlots {
     constructor() {
+        console.log('Starting game initialization...');
+
         // Initialize Telegram WebApp
         this.webApp = window.Telegram.WebApp;
         
@@ -56,7 +58,8 @@ class PixelSlots {
             '🎰': 10000
         };
         
-        this.balance = 0;
+        // Default values
+        this.balance = 10.00; // Start with $10
         this.bet = 0.10;
         this.jackpot = 1000.00;
         this.isSpinning = false;
@@ -66,14 +69,21 @@ class PixelSlots {
         this.database = database;
         this.analytics = analytics;
 
+        // Initialize UI first
+        this.initializeUI();
+
         // Track game load
         this.analytics('game_loaded', {
             telegram_id: user.id,
             username: user.username
         });
 
-        // Initialize game
-        this.initializeGame();
+        // Load user data
+        this.loadUserData().then(() => {
+            console.log('Game ready to play!');
+        }).catch(error => {
+            console.error('Error loading user data:', error);
+        });
     }
 
     async loadUserData() {
@@ -117,8 +127,10 @@ class PixelSlots {
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
+
+                console.log('Creating new user with data:', userData);
                 await set(this.userRef, userData);
-                console.log('Created new user:', userData);
+                console.log('Created new user');
 
                 // Track new user
                 this.analytics('new_user_created', {
@@ -129,11 +141,19 @@ class PixelSlots {
                 console.log('Found existing user:', userData);
             }
 
-            // Update balance
+            // Update balance and display
             this.balance = userData.balance;
             this.updateBalanceDisplay();
-            console.log('Balance Updated:', this.balance);
+            this.updateBetDisplay();
+            this.updateWinTable();
+            this.updateJackpot(1000.00);
 
+            // Set initial symbols
+            this.reels.forEach(reel => {
+                reel.querySelector('.symbol').textContent = this.getRandomSymbol();
+            });
+
+            console.log('Balance Updated:', this.balance);
             return userData;
         } catch (error) {
             console.error('Error loading user:', error);
@@ -155,6 +175,7 @@ class PixelSlots {
             
             console.log('=== SAVING USER DATA ===');
             console.log('Telegram ID:', telegramId);
+            console.log('Current Balance:', this.balance);
             
             // Get current data
             const snapshot = await get(this.userRef);
@@ -202,8 +223,9 @@ class PixelSlots {
             }
 
             // Save to Firebase
+            console.log('Saving updates:', updates);
             await update(this.userRef, updates);
-            console.log('Updated user data:', updates);
+            console.log('Updated user data');
 
             // Get updated data
             const newSnapshot = await get(this.userRef);
@@ -291,35 +313,9 @@ class PixelSlots {
         }
     }
 
-    async initializeGame() {
-        try {
-            // Initialize UI
-            this.initializeUI();
-            
-            // Load user data
-            const userData = await this.loadUserData();
-            if (!userData) {
-                throw new Error('Failed to load user data');
-            }
-
-            // Initialize game state
-            this.updateBetDisplay();
-            this.updateWinTable();
-            this.updateJackpot(1000.00);
-
-            // Set initial symbols
-            this.reels.forEach(reel => {
-                reel.querySelector('.symbol').textContent = this.getRandomSymbol();
-            });
-
-            console.log('Game initialized successfully');
-        } catch (error) {
-            console.error('Game initialization failed:', error);
-            alert('Error: ' + error.message);
-        }
-    }
-
     initializeUI() {
+        console.log('Initializing UI...');
+
         // Get UI elements
         this.reels = Array.from(document.querySelectorAll('.reel'));
         this.spinButton = document.getElementById('spin-button');
@@ -341,6 +337,12 @@ class PixelSlots {
         this.decreaseBetButton.addEventListener('click', () => this.adjustBet(-0.10));
         this.increaseBetButton.addEventListener('click', () => this.adjustBet(0.10));
         this.collectWinButton.addEventListener('click', () => this.hideWinDisplay());
+
+        // Update displays
+        this.updateBalanceDisplay();
+        this.updateBetDisplay();
+
+        console.log('UI initialized');
     }
 
     getRandomSymbol() {
@@ -353,6 +355,7 @@ class PixelSlots {
 
     updateBalanceDisplay() {
         if (this.balanceDisplay) {
+            console.log('Updating balance display:', this.balance);
             this.balanceDisplay.textContent = this.formatMoney(this.balance);
         }
     }
@@ -411,6 +414,7 @@ class PixelSlots {
 }
 
 // Initialize game when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
+    console.log('Page loaded, initializing game...');
     window.game = new PixelSlots();
 });
