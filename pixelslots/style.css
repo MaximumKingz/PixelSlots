@@ -1,0 +1,164 @@
+:root {
+    --tg-theme-bg-color: #1c1c1c;
+    --tg-theme-text-color: #ffffff;
+    --tg-theme-button-color: #3390ec;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-viewport-height: 100vh;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    height: var(--tg-viewport-height);
+    overflow: hidden;
+}
+
+.game-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.reel {
+    width: 80px;
+    height: 80px;
+    background: #2c2c2c;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.reel.spinning .symbol {
+    animation: spin 0.2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(50px); opacity: 0; }
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bet-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+button {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#spin-button {
+    font-size: 1.2em;
+    padding: 15px 30px;
+    font-weight: bold;
+}
+
+.win-table {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: #2c2c2c;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.win-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+}
+
+.win-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.win-overlay.hidden {
+    display: none;
+}
+
+.win-content {
+    background: #2c2c2c;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.win-content h2 {
+    color: gold;
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+
+.win-content .win-amount {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: #3390ec;
+    text-shadow: 0 0 10px rgba(51,144,236,0.5);
+}
+
+.jackpot {
+    color: gold;
+    text-shadow: 0 0 5px rgba(255,215,0,0.5);
+}

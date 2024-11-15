@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pixel Slots</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="stats">
+            <div class="balance">Balance: <span id="balance">$10.00</span></div>
+            <div class="jackpot">Jackpot: <span id="jackpot">$1,000.00</span></div>
+        </div>
+
+        <div class="slot-machine">
+            <div class="reel"><div class="symbol">🎰</div></div>
+            <div class="reel"><div class="symbol">🎰</div></div>
+            <div class="reel"><div class="symbol">🎰</div></div>
+        </div>
+
+        <div class="controls">
+            <div class="bet-controls">
+                <button id="decrease-bet">-</button>
+                <div class="current-bet">Bet: <span id="current-bet">$0.10</span></div>
+                <button id="increase-bet">+</button>
+            </div>
+            <button id="spin-button">SPIN</button>
+            <button id="max-bet">MAX BET</button>
+            <button id="auto-play">AUTO</button>
+        </div>
+
+        <div class="win-table">
+            <div class="win-row">
+                <div class="symbols">🎰 🎰 🎰</div>
+                <div class="win-amount jackpot">JACKPOT</div>
+            </div>
+            <div class="win-row">
+                <div class="symbols">7️⃣ 7️⃣ 7️⃣</div>
+                <div class="win-amount">x20</div>
+            </div>
+            <div class="win-row">
+                <div class="symbols">💎 💎 💎</div>
+                <div class="win-amount">x10</div>
+            </div>
+            <div class="win-row">
+                <div class="symbols">🍊 🍊 🍊</div>
+                <div class="win-amount">x4</div>
+            </div>
+            <div class="win-row">
+                <div class="symbols">🍋 🍋 🍋</div>
+                <div class="win-amount">x3</div>
+            </div>
+            <div class="win-row">
+                <div class="symbols">🍒 🍒 🍒</div>
+                <div class="win-amount">x2</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-overlay" class="win-overlay hidden">
+        <div class="win-content">
+            <h2>YOU WIN!</h2>
+            <div id="win-amount" class="win-amount">$0.00</div>
+            <button id="collect-win">COLLECT</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
