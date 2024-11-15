@@ -1,23 +1,11 @@
-// Import Firebase functions
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getDatabase, ref, set, get, update, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.esm.js';
-import { logEvent } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.esm.js';
+// Import Supabase client
+import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
 
-// Initialize Firebase
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-const analytics = logEvent;
+// Initialize Supabase client
+const supabaseUrl = 'YOUR_SUPABASE_URL';
+const supabaseKey = 'YOUR_SUPABASE_KEY';
+const supabaseSecret = 'YOUR_SUPABASE_SECRET';
+const supabase = createClient(supabaseUrl, supabaseKey, supabaseSecret);
 
 class PixelSlots {
     constructor() {
@@ -65,18 +53,11 @@ class PixelSlots {
         this.isSpinning = false;
         this.autoPlayActive = false;
         
-        // Firebase
-        this.database = database;
-        this.analytics = analytics;
+        // Supabase client
+        this.supabase = supabase;
 
         // Initialize UI first
         this.initializeUI();
-
-        // Track game load
-        this.analytics('game_loaded', {
-            telegram_id: user.id,
-            username: user.username
-        });
 
         // Load user data
         this.loadUserData().then(() => {
@@ -102,16 +83,16 @@ class PixelSlots {
             console.log('Telegram ID:', telegramId);
             console.log('Username:', username);
             
-            // Get Firebase reference
-            this.userRef = ref(this.database, 'users/' + telegramId);
-            
-            // Get user data
-            const snapshot = await get(this.userRef);
-            let userData = snapshot.val();
-            
+            // Get user data from Supabase
+            let { data: userData, error } = await this.supabase
+                .from('users')
+                .select('*')
+                .eq('telegram_id', telegramId)
+                .single();
+
             // Create new user if doesn't exist
-            if (!userData) {
-                userData = {
+            if (error || !userData) {
+                const newUser = {
                     telegram_id: telegramId,
                     username: username,
                     balance: 10.00,
@@ -122,21 +103,22 @@ class PixelSlots {
                     total_win_amount: 0,
                     total_loss_amount: 0,
                     jackpots_won: 0,
-                    last_spin: null,
-                    last_win: null,
+                    last_spin: new Date().toISOString(),
+                    last_win: new Date().toISOString(),
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('Creating new user with data:', userData);
-                await set(this.userRef, userData);
-                console.log('Created new user');
+                console.log('Creating new user with data:', newUser);
+                const { data, error: insertError } = await this.supabase
+                    .from('users')
+                    .insert([newUser])
+                    .select()
+                    .single();
 
-                // Track new user
-                this.analytics('new_user_created', {
-                    telegram_id: telegramId,
-                    username: username
-                });
+                if (insertError) throw insertError;
+                userData = data;
+                console.log('Created new user');
             } else {
                 console.log('Found existing user:', userData);
             }
@@ -178,8 +160,13 @@ class PixelSlots {
             console.log('Current Balance:', this.balance);
             
             // Get current data
-            const snapshot = await get(this.userRef);
-            const userData = snapshot.val();
+            let { data: userData, error } = await this.supabase
+                .from('users')
+                .select('*')
+                .eq('telegram_id', telegramId)
+                .single();
+
+            if (error) throw error;
             
             // Update user data
             const updates = {
@@ -197,42 +184,25 @@ class PixelSlots {
 
                 if (isJackpot) {
                     updates.jackpots_won = userData.jackpots_won + 1;
-                    
-                    // Track jackpot win
-                    this.analytics('jackpot_won', {
-                        telegram_id: telegramId,
-                        amount: winAmount
-                    });
                 }
-
-                // Track win
-                this.analytics('game_win', {
-                    telegram_id: telegramId,
-                    amount: winAmount,
-                    is_jackpot: isJackpot
-                });
             } else {
                 updates.total_losses = userData.total_losses + 1;
                 updates.total_loss_amount = userData.total_loss_amount + winAmount;
-
-                // Track loss
-                this.analytics('game_loss', {
-                    telegram_id: telegramId,
-                    amount: winAmount
-                });
             }
 
-            // Save to Firebase
+            // Save to Supabase
             console.log('Saving updates:', updates);
-            await update(this.userRef, updates);
-            console.log('Updated user data');
+            const { data: updatedData, error: updateError } = await this.supabase
+                .from('users')
+                .update(updates)
+                .eq('telegram_id', telegramId)
+                .select()
+                .single();
 
-            // Get updated data
-            const newSnapshot = await get(this.userRef);
-            const newUserData = newSnapshot.val();
-            console.log('New user data:', newUserData);
+            if (updateError) throw updateError;
+            console.log('Updated user data:', updatedData);
 
-            return newUserData;
+            return updatedData;
         } catch (error) {
             console.error('Error saving user:', error);
             alert('Error: ' + error.message);
@@ -250,12 +220,6 @@ class PixelSlots {
         this.isSpinning = true;
         this.balance -= this.bet;
         this.updateBalanceDisplay();
-
-        // Track spin
-        this.analytics('game_spin', {
-            telegram_id: this.webApp.initDataUnsafe?.user?.id,
-            bet_amount: this.bet
-        });
 
         try {
             this.reels.forEach(reel => reel.classList.add('spinning'));
