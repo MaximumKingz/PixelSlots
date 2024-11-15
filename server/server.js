@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
     res.json({ status: 'Server is running' });
 });
 
-// Get user data
+// Get or create user data
 app.get('/api/user/:telegramId', async (req, res) => {
     try {
         const { telegramId } = req.params;
@@ -33,11 +33,18 @@ app.get('/api/user/:telegramId', async (req, res) => {
         
         // Create new user if not exists
         if (!user) {
+            console.log('Creating new user:', telegramId);
             user = await User.create({
                 telegramId,
                 username: req.query.username,
-                balance: 10.00
+                balance: 10.00,
+                hasReceivedBonus: true,
+                created: Date.now(),
+                lastUpdated: Date.now()
             });
+            console.log('New user created:', user);
+        } else {
+            console.log('Existing user found:', telegramId);
         }
         
         res.json(user);
@@ -53,6 +60,12 @@ app.post('/api/user/:telegramId/update', async (req, res) => {
         const { telegramId } = req.params;
         const { balance, isWin, winAmount, isJackpot } = req.body;
         
+        // Find user first to validate
+        const existingUser = await User.findOne({ telegramId });
+        if (!existingUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
         const updateData = {
             balance,
             lastUpdated: Date.now(),
@@ -89,6 +102,11 @@ app.post('/api/user/:telegramId/update', async (req, res) => {
             { new: true }
         );
         
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log('Updated user:', user);
         res.json(user);
     } catch (error) {
         console.error('Error updating user:', error);
@@ -110,7 +128,8 @@ app.get('/api/user/:telegramId/stats', async (req, res) => {
             stats: user.stats,
             lastSpin: user.lastSpin,
             lastWin: user.lastWin,
-            created: user.created
+            created: user.created,
+            hasReceivedBonus: user.hasReceivedBonus
         });
     } catch (error) {
         console.error('Error getting user stats:', error);

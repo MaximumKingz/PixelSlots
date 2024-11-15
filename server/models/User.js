@@ -4,12 +4,16 @@ const userSchema = new mongoose.Schema({
     telegramId: {
         type: String,
         required: true,
-        unique: true
+        unique: true // Ensures each Telegram user is saved only once
     },
     username: String,
     balance: {
         type: Number,
-        default: 10.00
+        default: 10.00 // Initial bonus for new users
+    },
+    hasReceivedBonus: {
+        type: Boolean,
+        default: true // Marks that they've received their initial bonus
     },
     stats: {
         totalSpins: {

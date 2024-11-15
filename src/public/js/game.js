@@ -56,12 +56,10 @@ class PixelSlots {
             console.log('Loaded user data:', userData);
             
             // Update the game with the loaded balance
-            this.updateBalance(userData.balance || 10.00);
+            this.updateBalance(userData.balance);
             return userData;
         } catch (error) {
             console.error('Error loading user data:', error);
-            // If there's an error, set default balance
-            this.updateBalance(10.00);
             return null;
         }
     }
