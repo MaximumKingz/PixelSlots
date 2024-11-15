@@ -15,6 +15,10 @@ body {
     padding: 20px;
     min-height: 100vh;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Game Container */
@@ -51,6 +55,36 @@ body {
     animation: spin 1s steps(8) infinite;
 }
 
+#loading-screen p {
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+#error-screen h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#error-screen p {
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.big-button {
+    padding: 15px 30px;
+    font-size: 16px;
+    background: #111;
+    border: 4px solid #fff;
+    color: #fff;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.big-button:hover {
+    background: #fff;
+    color: #000;
+}
+
 /* Game Header */
 #game-header {
     display: flex;
@@ -67,6 +101,9 @@ body {
     border: 2px solid #fff;
     background: #111;
     text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 #jackpot-container {
@@ -240,6 +277,15 @@ button:disabled {
 
     #bet-controls {
         font-size: 10px;
+    }
+
+    #error-screen h1 {
+        font-size: 20px;
+    }
+
+    .big-button {
+        padding: 12px 24px;
+        font-size: 14px;
     }
 }
 
