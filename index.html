@@ -10,42 +10,77 @@
 </head>
 <body>
     <div id="game-container">
+        <div class="game-header">
+            <div id="jackpot-display">
+                <span class="label">JACKPOT:</span>
+                <span id="jackpot">1.000 BTC</span>
+            </div>
+        </div>
+
         <div id="slot-machine">
-            <div class="reels-container">
-                <div class="reel" id="reel1"></div>
-                <div class="reel" id="reel2"></div>
-                <div class="reel" id="reel3"></div>
-            </div>
-            <div class="controls">
-                <div class="bet-controls">
-                    <button id="decrease-bet">-</button>
-                    <span id="current-bet">0.001 BTC</span>
-                    <button id="increase-bet">+</button>
+            <div class="machine-frame">
+                <div class="reels-container">
+                    <div class="reel-box">
+                        <div class="reel" id="reel1">
+                            <div class="symbol">🍒</div>
+                        </div>
+                    </div>
+                    <div class="reel-box">
+                        <div class="reel" id="reel2">
+                            <div class="symbol">🍋</div>
+                        </div>
+                    </div>
+                    <div class="reel-box">
+                        <div class="reel" id="reel3">
+                            <div class="symbol">🍊</div>
+                        </div>
+                    </div>
                 </div>
+                <div class="payline"></div>
+            </div>
+
+            <div class="game-controls">
+                <div class="balance-display">
+                    <span class="label">BALANCE:</span>
+                    <span id="balance">0.000 BTC</span>
+                </div>
+
+                <div class="bet-controls">
+                    <button id="decrease-bet" class="bet-button">-</button>
+                    <div class="bet-display">
+                        <span class="label">BET:</span>
+                        <span id="current-bet">0.001 BTC</span>
+                    </div>
+                    <button id="increase-bet" class="bet-button">+</button>
+                </div>
+
                 <button id="spin-button" class="spin-button">SPIN</button>
+
+                <div class="auto-play">
+                    <button id="auto-play" class="auto-button">AUTO PLAY</button>
+                </div>
             </div>
         </div>
-        <div id="balance-container">
-            <span>Balance: </span>
-            <span id="balance">0.000 BTC</span>
-        </div>
-        <div id="jackpot-container">
-            <span>Jackpot: </span>
-            <span id="jackpot">0.000 BTC</span>
+
+        <div class="win-lines">
+            <div class="win-line">3x 🍒 = 2x</div>
+            <div class="win-line">3x 🍋 = 3x</div>
+            <div class="win-line">3x 🍊 = 4x</div>
+            <div class="win-line">3x 💎 = 10x</div>
+            <div class="win-line">3x 7️⃣ = 20x</div>
+            <div class="win-line">3x 🎰 = JACKPOT</div>
         </div>
     </div>
 
     <div id="win-overlay" class="hidden">
         <div class="win-content">
             <h2>🎉 BIG WIN! 🎉</h2>
-            <p id="win-amount"></p>
+            <p id="win-amount">0.000 BTC</p>
             <button id="collect-win">COLLECT</button>
         </div>
     </div>
 
-    <script src="src/public/js/game.js"></script>
     <script src="src/public/js/audioManager.js"></script>
-    <script src="src/public/js/particleSystem.js"></script>
-    <script src="src/public/js/cryptoUI.js"></script>
+    <script src="src/public/js/game.js"></script>
 </body>
 </html>
