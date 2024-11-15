@@ -4,15 +4,29 @@ const config = require('../config');
 class TelegramService {
     constructor() {
         this.bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
-        this.webAppUrl = 'https://t.me/PixelSlotsBot/game'; // We'll update this after deployment
+        this.webAppUrl = 'https://maximumkingz.github.io/PixelSlots'; // Updated WebApp URL
+        this.botUsername = '@pixelslots_bot';
     }
 
     async setupWebhook(url) {
         try {
-            await this.bot.setWebHook(`${url}/api/telegram/webhook`);
-            console.log('Telegram webhook set up successfully');
+            await this.bot.deleteWebHook();
+            console.log('Deleted existing webhook');
+
+            // Set the new webhook
+            const result = await this.bot.setWebHook(`${url}/api/telegram/webhook`);
+            
+            if (result) {
+                console.log(`Successfully set webhook to: ${url}/api/telegram/webhook`);
+                
+                // Get webhook info
+                const info = await this.bot.getWebHookInfo();
+                console.log('Webhook Info:', info);
+            } else {
+                console.error('Failed to set webhook');
+            }
         } catch (error) {
-            console.error('Failed to set up Telegram webhook:', error);
+            console.error('Failed to set up webhook:', error);
             throw error;
         }
     }
