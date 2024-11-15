@@ -327,10 +327,14 @@ class PixelSlots {
     updateWinTable() {
         const rows = document.querySelectorAll('.win-row');
         rows.forEach(row => {
-            const symbol = row.querySelector('.symbols')?.textContent;
-            const multiplier = this.symbolValues[symbol];
-            if (multiplier) {
-                row.querySelector('.win-amount').textContent = `x${multiplier}`;
+            const symbols = row.querySelector('span:first-child')?.textContent;
+            if (symbols) {
+                const symbol = symbols[0]; // Get first symbol (they're all the same)
+                const multiplier = this.symbolValues[symbol];
+                if (multiplier) {
+                    row.querySelector('span:last-child').textContent = 
+                        symbol === this.jackpotSymbol ? 'JACKPOT' : `x${multiplier}`;
+                }
             }
         });
     }
