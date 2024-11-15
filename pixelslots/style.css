@@ -20,14 +20,24 @@ body {
     color: white;
 }
 
-.game-container {
+#game-container {
     max-width: 600px;
     margin: 0 auto;
-    padding: 20px;
+    text-align: center;
+}
+
+.game-container {
     display: flex;
     flex-direction: column;
     gap: 20px;
     height: 100%;
+}
+
+#game-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 1.2em;
 }
 
 .stats {
@@ -36,6 +46,13 @@ body {
     font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 20px;
+}
+
+#slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
 }
 
 .slot-machine {
@@ -61,11 +78,23 @@ body {
     transition: transform 0.5s ease-out;
 }
 
+#controls {
+    margin: 20px 0;
+}
+
 .controls {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin: 20px 0;
+}
+
+#bet-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .bet-controls {
@@ -84,26 +113,48 @@ button {
     background: #4a4a4a;
     color: white;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
 }
 
-button:hover {
+button:not(:disabled):hover {
     background: #5a5a5a;
+    transform: translateY(-2px);
 }
 
-button:active {
+button:not(:disabled):active {
     background: #3a3a3a;
+    transform: translateY(0);
 }
 
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    background: #2a2a2a;
 }
 
 #spin-button {
-    font-size: 1.2em;
     padding: 15px 30px;
-    font-weight: bold;
+    font-size: 1.2em;
+    background: #4CAF50;
+}
+
+#spin-button:not(:disabled):hover {
+    background: #45a049;
+}
+
+#spin-button:not(:disabled):active {
+    background: #3d8b40;
+}
+
+#spin-button:disabled {
+    background: #2d5e2f;
+}
+
+#win-table {
+    margin-top: 20px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px;
 }
 
 .win-table {
@@ -133,6 +184,19 @@ button:disabled {
     to { transform: translateY(-100%); }
 }
 
+#win-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
 .win-overlay {
     position: fixed;
     top: 0;
@@ -144,6 +208,14 @@ button:disabled {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+}
+
+#win-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    animation: popup 0.3s ease-out;
 }
 
 .win-content {
@@ -159,9 +231,20 @@ button:disabled {
     to { transform: scale(1); opacity: 1; }
 }
 
+#win-content h2 {
+    color: #4CAF50;
+    margin: 0 0 10px 0;
+}
+
 .win-content h2 {
     color: #4CAF50;
     margin: 0 0 10px 0;
+}
+
+#win-amount {
+    font-size: 2em;
+    margin: 10px 0;
+    color: #FFD700;
 }
 
 .win-amount {
@@ -192,7 +275,7 @@ button:disabled {
         font-size: 0.9em;
     }
 
-    .stats {
+    #game-header {
         font-size: 1em;
     }
 }

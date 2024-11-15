@@ -50,8 +50,12 @@ class PixelSlots {
         // Load user data
         this.loadUserData().then(() => {
             console.log('Game ready to play!');
+            // Enable spin button
+            this.spinButton.disabled = false;
         }).catch(error => {
             console.error('Error loading user data:', error);
+            // Disable spin button
+            this.spinButton.disabled = true;
         });
     }
 
@@ -205,6 +209,9 @@ class PixelSlots {
             return;
         }
 
+        // Disable spin button
+        this.spinButton.disabled = true;
+
         this.isSpinning = true;
         this.balance -= this.bet;
         this.updateBalanceDisplay();
@@ -232,6 +239,8 @@ class PixelSlots {
             alert('Error: ' + error.message);
         } finally {
             this.isSpinning = false;
+            // Enable spin button
+            this.spinButton.disabled = false;
 
             if (this.autoPlayActive && this.balance >= this.bet) {
                 setTimeout(() => this.spin(), 1000);
@@ -281,6 +290,9 @@ class PixelSlots {
         this.winOverlay = document.getElementById('win-overlay');
         this.winAmount = document.getElementById('win-amount');
         this.collectWinButton = document.getElementById('collect-win');
+
+        // Disable spin button initially
+        this.spinButton.disabled = true;
 
         // Add event listeners
         this.spinButton.addEventListener('click', () => this.spin());
@@ -370,7 +382,7 @@ class PixelSlots {
 }
 
 // Initialize game when DOM is loaded
-window.addEventListener('load', () => {
+window.addEventListener('DOMContentLoaded', () => {
     console.log('Page loaded, initializing game...');
     window.game = new PixelSlots();
 });
