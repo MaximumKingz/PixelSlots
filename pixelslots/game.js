@@ -1,3 +1,7 @@
+// Import Firebase functions
+import { ref, set, get, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.esm.js';
+import { logEvent } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.esm.js';
+
 class PixelSlots {
     constructor() {
         // Initialize Telegram WebApp
@@ -41,13 +45,12 @@ class PixelSlots {
         this.isSpinning = false;
         this.autoPlayActive = false;
         
-        // Firebase database
-        this.database = firebase.database();
-        this.analytics = firebase.analytics();
-        this.userRef = null;
+        // Firebase
+        this.database = window.firebaseDatabase;
+        this.analytics = window.firebaseAnalytics;
 
         // Track game load
-        this.analytics.logEvent('game_loaded', {
+        logEvent(this.analytics, 'game_loaded', {
             telegram_id: user.id,
             username: user.username
         });
@@ -73,10 +76,10 @@ class PixelSlots {
             console.log('Username:', username);
             
             // Get Firebase reference
-            this.userRef = this.database.ref('users/' + telegramId);
+            const userRef = ref(this.database, 'users/' + telegramId);
             
             // Get user data
-            const snapshot = await this.userRef.once('value');
+            const snapshot = await get(userRef);
             let userData = snapshot.val();
             
             // Create new user if doesn't exist
@@ -97,11 +100,11 @@ class PixelSlots {
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
-                await this.userRef.set(userData);
+                await set(userRef, userData);
                 console.log('Created new user:', userData);
 
                 // Track new user
-                this.analytics.logEvent('new_user_created', {
+                logEvent(this.analytics, 'new_user_created', {
                     telegram_id: telegramId,
                     username: username
                 });
@@ -113,6 +116,9 @@ class PixelSlots {
             this.balance = userData.balance;
             this.updateBalanceDisplay();
             console.log('Balance Updated:', this.balance);
+
+            // Save reference
+            this.userRef = userRef;
 
             return userData;
         } catch (error) {
@@ -137,7 +143,7 @@ class PixelSlots {
             console.log('Telegram ID:', telegramId);
             
             // Get current data
-            const snapshot = await this.userRef.once('value');
+            const snapshot = await get(this.userRef);
             const userData = snapshot.val();
             
             // Update user data
@@ -158,14 +164,14 @@ class PixelSlots {
                     updates.jackpots_won = userData.jackpots_won + 1;
                     
                     // Track jackpot win
-                    this.analytics.logEvent('jackpot_won', {
+                    logEvent(this.analytics, 'jackpot_won', {
                         telegram_id: telegramId,
                         amount: winAmount
                     });
                 }
 
                 // Track win
-                this.analytics.logEvent('game_win', {
+                logEvent(this.analytics, 'game_win', {
                     telegram_id: telegramId,
                     amount: winAmount,
                     is_jackpot: isJackpot
@@ -175,18 +181,18 @@ class PixelSlots {
                 updates.total_loss_amount = userData.total_loss_amount + winAmount;
 
                 // Track loss
-                this.analytics.logEvent('game_loss', {
+                logEvent(this.analytics, 'game_loss', {
                     telegram_id: telegramId,
                     amount: winAmount
                 });
             }
 
             // Save to Firebase
-            await this.userRef.update(updates);
+            await update(this.userRef, updates);
             console.log('Updated user data:', updates);
 
             // Get updated data
-            const newSnapshot = await this.userRef.once('value');
+            const newSnapshot = await get(this.userRef);
             const newUserData = newSnapshot.val();
             console.log('New user data:', newUserData);
 
@@ -371,7 +377,7 @@ class PixelSlots {
         this.updateBalanceDisplay();
 
         // Track spin
-        this.analytics.logEvent('game_spin', {
+        logEvent(this.analytics, 'game_spin', {
             telegram_id: this.webApp.initDataUnsafe?.user?.id,
             bet_amount: this.bet
         });

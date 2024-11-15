@@ -1,5 +1,5 @@
 // Firebase configuration
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: "AIzaSyDt5TovHhe0saMOkY2UuU6GyUdqea9UEuI",
     authDomain: "pixelslotsfruits.firebaseapp.com",
     databaseURL: "https://pixelslotsfruits-default-rtdb.europe-west1.firebasedatabase.app",

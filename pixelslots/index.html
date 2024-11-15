@@ -10,12 +10,23 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
-    
-    <!-- Firebase Config -->
-    <script src="firebase-config.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import { firebaseConfig } from "./firebase-config.js";
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const analytics = getAnalytics(app);
+
+        // Make Firebase available globally
+        window.firebaseApp = app;
+        window.firebaseDatabase = database;
+        window.firebaseAnalytics = analytics;
+    </script>
 </head>
 <body>
     <div id="game-container">
@@ -84,15 +95,10 @@
     </div>
 
     <script>
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const analytics = firebase.analytics();
-        
         // Initialize Telegram WebApp
         window.Telegram.WebApp.ready();
     </script>
-    <script src="game.js"></script>
+    <script type="module" src="game.js"></script>
     <script>
         // Wait for Telegram WebApp to be ready
         window.addEventListener('load', () => {
