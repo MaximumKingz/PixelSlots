@@ -21,7 +21,10 @@ class PixelSlots {
         this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
         
-        console.log('Initializing game...');
+        // Use Strato API URL
+        this.apiUrl = 'https://maximumkingz.de/pixelslots/api.php';
+        
+        console.log('Game initialized with API:', this.apiUrl);
         console.log('Telegram WebApp:', this.webApp);
         console.log('Telegram User:', this.webApp.initDataUnsafe?.user);
 
@@ -33,12 +36,11 @@ class PixelSlots {
         try {
             if (!this.webApp.initDataUnsafe?.user?.id) {
                 console.error('No Telegram user ID found');
-                alert('Please open this game in Telegram!');
                 return null;
             }
 
             const username = this.webApp.initDataUnsafe.user.username || '';
-            const telegramId = this.webApp.initDataUnsafe.user.id;
+            const telegramId = this.webApp.initDataUnsafe.user.id.toString();
             
             console.log('Loading data for user:', {
                 telegramId,
@@ -46,37 +48,35 @@ class PixelSlots {
             });
             
             const response = await fetch(
-                `api.php?telegram_id=${telegramId}&username=${username}`,
+                `${this.apiUrl}?telegram_id=${telegramId}&username=${username}`,
                 {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors'
                 }
             );
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const userData = await response.json();
             console.log('API Response:', userData);
-            
-            if (userData.error) {
-                console.error('API Error:', userData.error);
-                alert('Error loading user data: ' + userData.error);
-                return null;
-            }
             
             if (userData && typeof userData.balance === 'number') {
                 await this.updateBalance(userData.balance);
                 console.log('Updated balance to:', userData.balance);
             } else {
                 console.error('Invalid user data received:', userData);
-                alert('Invalid user data received');
                 return null;
             }
 
             return userData;
         } catch (error) {
             console.error('Error loading user data:', error);
-            alert('Error: ' + error.message);
             return null;
         }
     }
@@ -88,7 +88,7 @@ class PixelSlots {
                 return;
             }
 
-            const telegramId = this.webApp.initDataUnsafe.user.id;
+            const telegramId = this.webApp.initDataUnsafe.user.id.toString();
             console.log('Saving data for user:', {
                 telegramId,
                 balance: this.balance,
@@ -98,12 +98,14 @@ class PixelSlots {
             });
 
             const response = await fetch(
-                `api.php?telegram_id=${telegramId}`,
+                `${this.apiUrl}?telegram_id=${telegramId}`,
                 {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
+                    mode: 'cors',
                     body: JSON.stringify({
                         balance: this.balance,
                         isWin,
@@ -113,19 +115,15 @@ class PixelSlots {
                 }
             );
 
-            const userData = await response.json();
-            console.log('API Save Response:', userData);
-            
-            if (userData.error) {
-                console.error('API Save Error:', userData.error);
-                alert('Error saving data: ' + userData.error);
-                return null;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
+            const userData = await response.json();
+            console.log('API Save Response:', userData);
             return userData;
         } catch (error) {
             console.error('Error saving user data:', error);
-            alert('Error: ' + error.message);
             await this.loadUserData();
         }
     }
