@@ -30,11 +30,10 @@ class PixelSlots {
 
         // Log Telegram data
         console.log('=== TELEGRAM DATA ===');
-        console.log('WebApp:', this.webApp);
         console.log('User:', this.webApp.initDataUnsafe?.user);
-        console.log('User ID:', this.webApp.initDataUnsafe?.user?.id);
+        console.log('ID:', this.webApp.initDataUnsafe?.user?.id);
         console.log('Username:', this.webApp.initDataUnsafe?.user?.username);
-        
+
         // API URL
         this.apiUrl = 'https://maximumkingz.de/pixelslots/api.php';
         console.log('API URL:', this.apiUrl);
@@ -48,11 +47,7 @@ class PixelSlots {
         try {
             // Check Telegram data
             if (!this.webApp?.initDataUnsafe?.user?.id) {
-                console.error('No Telegram user data!', {
-                    webApp: this.webApp,
-                    initDataUnsafe: this.webApp?.initDataUnsafe,
-                    user: this.webApp?.initDataUnsafe?.user
-                });
+                console.error('No Telegram user data!');
                 alert('Please open this game in Telegram!');
                 return null;
             }
@@ -67,7 +62,7 @@ class PixelSlots {
             
             // Make API request
             const url = `${this.apiUrl}?telegram_id=${telegramId}&username=${username}`;
-            console.log('API URL:', url);
+            console.log('API Request URL:', url);
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -77,13 +72,7 @@ class PixelSlots {
                 }
             });
 
-            console.log('API Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Object.fromEntries(response.headers.entries())
-            });
-
-            // Get response text
+            console.log('API Response Status:', response.status);
             const responseText = await response.text();
             console.log('API Response Text:', responseText);
 
@@ -143,7 +132,7 @@ class PixelSlots {
 
             // Make API request
             const url = `${this.apiUrl}?telegram_id=${telegramId}`;
-            console.log('API URL:', url);
+            console.log('API Request URL:', url);
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -154,13 +143,7 @@ class PixelSlots {
                 body: JSON.stringify(data)
             });
 
-            console.log('API Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Object.fromEntries(response.headers.entries())
-            });
-
-            // Get response text
+            console.log('API Response Status:', response.status);
             const responseText = await response.text();
             console.log('API Response Text:', responseText);
 
