@@ -11,54 +11,23 @@
     
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Game Scripts -->
-    <script>
-        // Debug mode
-        window.DEBUG = true;
-        window.log = (...args) => window.DEBUG && console.log(...args);
-
-        // Initialize Telegram WebApp
-        window.addEventListener('load', () => {
-            try {
-                const tg = window.Telegram.WebApp;
-                window.log('=== INITIALIZATION ===');
-                window.log('Telegram:', tg);
-                window.log('User:', tg.initDataUnsafe?.user);
-                window.log('Platform:', tg.platform);
-                window.log('Version:', tg.version);
-
-                // Set theme
-                tg.setHeaderColor('#1a1a1a');
-                tg.setBackgroundColor('#1a1a1a');
-                tg.enableClosingConfirmation();
-                tg.expand();
-
-                // Initialize Supabase
-                const supabaseUrl = 'https://vcspybmymfmxhvqeehkp.supabase.co';
-                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc3B5Ym15bWZteGh2cWVlaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2OTU3NzEsImV4cCI6MjA0NzI3MTc3MX0.wyzWwNd5F0HDjKCRPnSZ7vXajh6XVa9t0TjU5PG6P7I';
-                
-                window.log('Initializing Supabase...');
-                const { createClient } = supabase;
-                window.supabase = createClient(supabaseUrl, supabaseKey);
-                window.log('Supabase initialized');
-
-                // Initialize game
-                window.game = new PixelSlots();
-                window.log('Game initialized');
-
-                // Mark as ready
-                tg.ready();
-                window.log('Telegram WebApp ready');
-            } catch (error) {
-                console.error('Initialization error:', error);
-                alert('Error: ' + error.message);
-            }
-        });
-    </script>
 </head>
 <body>
-    <div id="game-container">
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Registration Screen -->
+    <div id="registration-screen" style="display: none;">
+        <h1>Welcome to Pixel Slots!</h1>
+        <p>Get $10 FREE to start playing!</p>
+        <button id="register-button" class="big-button">START PLAYING</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-container" style="display: none;">
         <div id="game-header">
             <div id="balance-container">
                 <span>Balance:</span>
@@ -83,7 +52,7 @@
                 <button id="increase-bet">+</button>
             </div>
             <button id="max-bet">MAX BET</button>
-            <button id="spin-button" disabled>LOADING...</button>
+            <button id="spin-button" disabled>SPIN!</button>
             <button id="auto-play">AUTO</button>
         </div>
 
@@ -123,6 +92,139 @@
         </div>
     </div>
 
+    <!-- Game Scripts -->
+    <script>
+        // Debug mode
+        window.DEBUG = true;
+        window.log = (...args) => window.DEBUG && console.log(...args);
+
+        // Initialize Supabase
+        const supabaseUrl = 'https://vcspybmymfmxhvqeehkp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc3B5Ym15bWZteGh2cWVlaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2OTU3NzEsImV4cCI6MjA0NzI3MTc3MX0.wyzWwNd5F0HDjKCRPnSZ7vXajh6XVa9t0TjU5PG6P7I';
+        
+        window.log('Initializing Supabase...');
+        const { createClient } = supabase;
+        window.supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Initialize Telegram WebApp
+        window.addEventListener('load', async () => {
+            try {
+                window.log('Page loaded, initializing...');
+                
+                // Initialize Telegram
+                const tg = window.Telegram.WebApp;
+                if (!tg) {
+                    throw new Error('Please open in Telegram!');
+                }
+
+                // Set theme
+                tg.expand();
+                tg.setHeaderColor('#1a1a1a');
+                tg.setBackgroundColor('#1a1a1a');
+                tg.enableClosingConfirmation();
+
+                window.log('=== INITIALIZATION ===');
+                window.log('Telegram:', tg);
+                window.log('User:', tg.initDataUnsafe?.user);
+                window.log('Platform:', tg.platform);
+                window.log('Version:', tg.version);
+
+                // Check if user exists
+                const user = tg.initDataUnsafe?.user;
+                if (!user || !user.id) {
+                    throw new Error('Please open in Telegram!');
+                }
+
+                // Check if user is registered
+                const { data: userData, error } = await window.supabase
+                    .from('users')
+                    .select('*')
+                    .eq('telegram_id', user.id.toString())
+                    .single();
+
+                // Hide loading screen
+                document.getElementById('loading-screen').style.display = 'none';
+
+                if (error || !userData) {
+                    // Show registration screen
+                    document.getElementById('registration-screen').style.display = 'flex';
+                } else {
+                    // Show game
+                    document.getElementById('game-container').style.display = 'block';
+                    window.game = new PixelSlots();
+                }
+
+                // Mark as ready
+                tg.ready();
+            } catch (error) {
+                window.log('Initialization error:', error);
+                alert('Error: ' + error.message);
+            }
+        });
+
+        // Registration handler
+        document.getElementById('register-button').addEventListener('click', async () => {
+            try {
+                window.log('Starting registration...');
+                const tg = window.Telegram.WebApp;
+                const user = tg.initDataUnsafe?.user;
+                
+                if (!user || !user.id) {
+                    throw new Error('Please open in Telegram!');
+                }
+
+                window.log('User:', user);
+                const registerButton = document.getElementById('register-button');
+                registerButton.textContent = 'REGISTERING...';
+                registerButton.disabled = true;
+
+                // Create user in Supabase
+                const { data, error } = await window.supabase
+                    .from('users')
+                    .insert([{
+                        telegram_id: user.id.toString(),
+                        username: user.username || user.first_name || '',
+                        balance: 10.00,
+                        total_spins: 0,
+                        total_wins: 0,
+                        total_losses: 0,
+                        biggest_win: 0,
+                        total_win_amount: 0,
+                        total_loss_amount: 0,
+                        jackpots_won: 0,
+                        last_spin: new Date().toISOString(),
+                        last_win: new Date().toISOString(),
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                window.log('Registration successful!');
+
+                // Hide registration screen
+                document.getElementById('registration-screen').style.display = 'none';
+                
+                // Show game
+                document.getElementById('game-container').style.display = 'block';
+                
+                // Initialize game
+                window.game = new PixelSlots();
+            } catch (error) {
+                window.log('Registration error:', error);
+                alert('Error: ' + error.message);
+                
+                const registerButton = document.getElementById('register-button');
+                registerButton.textContent = 'TRY AGAIN';
+                registerButton.disabled = false;
+            }
+        });
+    </script>
+    
     <!-- Game Script -->
     <script src="game.js"></script>
 </body>
