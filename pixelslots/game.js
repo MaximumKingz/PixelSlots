@@ -9,11 +9,13 @@ class PixelSlots {
         console.log('=== TELEGRAM INITIALIZATION ===');
         console.log('WebApp Version:', this.webApp.version);
         console.log('Platform:', this.webApp.platform);
+        console.log('Init Data:', this.webApp.initData);
+        console.log('Init Data Unsafe:', this.webApp.initDataUnsafe);
         
         // Verify Telegram user
         const user = this.webApp.initDataUnsafe?.user;
         if (!user || !user.id) {
-            throw new Error('No Telegram user found!');
+            throw new Error('Please open in Telegram!');
         }
 
         // Log user data
@@ -54,7 +56,7 @@ class PixelSlots {
             console.error('Error loading user data:', error);
             // Disable spin button
             this.spinButton.disabled = true;
-            alert('Error: ' + error.message);
+            alert(error.message);
         });
     }
 
@@ -63,7 +65,7 @@ class PixelSlots {
             // Get Telegram user
             const user = this.webApp.initDataUnsafe?.user;
             if (!user || !user.id) {
-                throw new Error('No Telegram user found!');
+                throw new Error('Please open in Telegram!');
             }
 
             // Get user info
@@ -139,7 +141,7 @@ class PixelSlots {
             // Get Telegram user
             const user = this.webApp.initDataUnsafe?.user;
             if (!user || !user.id) {
-                throw new Error('No Telegram user found!');
+                throw new Error('Please open in Telegram!');
             }
 
             // Get user info
@@ -383,5 +385,10 @@ class PixelSlots {
 // Initialize game when DOM is loaded
 window.addEventListener('DOMContentLoaded', () => {
     console.log('Page loaded, initializing game...');
-    window.game = new PixelSlots();
+    try {
+        window.game = new PixelSlots();
+    } catch (error) {
+        console.error('Game initialization error:', error);
+        alert(error.message);
+    }
 });
