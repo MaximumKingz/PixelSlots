@@ -1,0 +1,387 @@
+/* Paytable Styles */
+#paytable {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #4a4a4a;
+    border-radius: 8px;
+}
+
+#paytable h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #FFD700;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 16px;
+}
+
+.paytable-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.paytable-row:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.paytable-row .pixel-symbol {
+    margin-right: 15px;
+    transform: scale(0.8);
+}
+
+.paytable-row span {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    color: #ffffff;
+}
+
+/* Settings Menu Styles */
+#settings-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#settings-menu .menu-content {
+    background: #1a1a1a;
+    padding: 20px;
+    border: 4px solid #4a4a4a;
+    border-radius: 8px;
+    min-width: 300px;
+}
+
+#settings-menu h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #FFD700;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 18px;
+}
+
+.setting-row {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.setting-row label {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    color: #ffffff;
+    margin-right: 10px;
+}
+
+/* Custom Range Input */
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 150px;
+    height: 8px;
+    background: #4a4a4a;
+    border-radius: 4px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #FFD700;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #FFA500;
+}
+
+/* Custom Select */
+select {
+    background: #4a4a4a;
+    border: none;
+    padding: 5px 10px;
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+}
+
+select:focus {
+    box-shadow: 0 0 0 2px #FFD700;
+}
+
+/* Custom Checkbox */
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #4a4a4a;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+}
+
+input[type="checkbox"]:checked {
+    background: #FFD700;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000000;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Achievement Notification Enhancements */
+.achievement-notification {
+    background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+    border: 2px solid #FFD700;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.achievement-notification h3 {
+    color: #FFD700;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.achievement-notification p {
+    color: #ffffff;
+    font-size: 12px;
+    margin: 5px 0;
+}
+
+/* Win Display Enhancements */
+#win-display {
+    background: linear-gradient(45deg, rgba(0, 0, 0, 0.9), rgba(26, 26, 26, 0.9));
+    border: 4px solid #FFD700;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+#win-display h2 {
+    color: #FFD700;
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#win-display #win-amount {
+    color: #ffffff;
+    font-size: 20px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    #paytable {
+        font-size: 10px;
+    }
+
+    .setting-row label {
+        font-size: 10px;
+    }
+
+    input[type="range"] {
+        width: 100px;
+    }
+
+    #settings-menu .menu-content {
+        width: 90%;
+        min-width: auto;
+    }
+}
+
+/* High Contrast Mode */
+.high-contrast {
+    --text-color: #ffffff;
+    --background-color: #000000;
+    --accent-color: #ffff00;
+    --border-color: #ffffff;
+}
+
+.high-contrast #paytable {
+    background: var(--background-color);
+    border-color: var(--border-color);
+}
+
+.high-contrast .paytable-row span {
+    color: var(--text-color);
+}
+
+.high-contrast #settings-menu .menu-content {
+    background: var(--background-color);
+    border-color: var(--border-color);
+}
+
+.high-contrast input[type="range"],
+.high-contrast select,
+.high-contrast input[type="checkbox"] {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+}
+
+/* Error Popup */
+.error-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.error-content {
+    background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+    border: 2px solid #FF4444;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.error-content h3 {
+    color: #FF4444;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.error-content p {
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.error-content button {
+    background: #FF4444;
+    color: #ffffff;
+    border: none;
+    padding: 8px 20px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.error-content button:hover {
+    background: #FF6666;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Animation Speed Settings */
+[data-animation-speed="slow"] .reel.spinning {
+    animation-duration: 3s;
+}
+
+[data-animation-speed="normal"] .reel.spinning {
+    animation-duration: 2s;
+}
+
+[data-animation-speed="fast"] .reel.spinning {
+    animation-duration: 1s;
+}
+
+/* High Contrast Mode Enhancements */
+.high-contrast .pixel-symbol {
+    border: 2px solid #ffffff;
+}
+
+.high-contrast .pixel-symbol.cherry::before,
+.high-contrast .pixel-symbol.cherry::after {
+    background: #ffffff;
+}
+
+.high-contrast .pixel-symbol.lemon::before {
+    background: #ffffff;
+}
+
+.high-contrast .pixel-symbol.orange::before {
+    background: #ffffff;
+}
+
+.high-contrast .pixel-symbol.plum::before {
+    background: #ffffff;
+}
+
+.high-contrast .pixel-symbol.bell::before {
+    background: #ffffff;
+}
+
+.high-contrast .pixel-symbol.seven::before {
+    color: #ffffff;
+    text-shadow: none;
+}
+
+.high-contrast .pixel-symbol.diamond::before {
+    background: #ffffff;
+}
+
+.high-contrast .pixel-symbol.bitcoin::before {
+    color: #ffffff;
+    text-shadow: none;
+}
+
+.high-contrast #win-display {
+    border-color: #ffffff;
+}
+
+.high-contrast .achievement-notification {
+    border-color: #ffffff;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 600px) {
+    .error-content {
+        width: 90%;
+        max-width: none;
+        margin: 0 20px;
+    }
+
+    .error-content h3 {
+        font-size: 14px;
+    }
+
+    .error-content p {
+        font-size: 10px;
+    }
+
+    .error-content button {
+        font-size: 10px;
+        padding: 6px 16px;
+    }
+}

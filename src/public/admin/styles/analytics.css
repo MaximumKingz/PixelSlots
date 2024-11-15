@@ -1,0 +1,417 @@
+/* Analytics Dashboard Layout */
+:root {
+    --primary-color: #FFD700;
+    --secondary-color: #4a4a4a;
+    --background-color: #1a1a1a;
+    --card-background: #2a2a2a;
+    --text-color: #ffffff;
+    --success-color: #44FF44;
+    --warning-color: #FFAA00;
+    --danger-color: #FF4444;
+    --border-color: #4a4a4a;
+    --chart-grid-color: #3a3a3a;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', cursive;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+.analytics-dashboard {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background: linear-gradient(45deg, #2a2a2a, #3a3a3a);
+    padding: 20px;
+    border-bottom: 4px solid var(--border-color);
+}
+
+header h1 {
+    color: var(--primary-color);
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.date-range {
+    display: flex;
+    gap: 10px;
+}
+
+.date-range input,
+select {
+    background: #333;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px;
+    color: var(--text-color);
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+}
+
+/* Grid Layout */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Cards */
+.card {
+    background: var(--card-background);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card.large {
+    grid-column: span 2;
+}
+
+.card h3 {
+    color: var(--primary-color);
+    margin: 0 0 15px 0;
+    font-size: 16px;
+}
+
+/* Chart Containers */
+.chart-container {
+    position: relative;
+    height: 200px;
+    margin-bottom: 15px;
+}
+
+.card.large .chart-container {
+    height: 300px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stat {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.stat .label {
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.stat .value {
+    font-size: 14px;
+    color: var(--primary-color);
+}
+
+/* Feature List */
+.feature-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.feature-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.feature-item:last-child {
+    border-bottom: none;
+}
+
+/* Jackpot Winners */
+.jackpot-winners {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.winner-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.winner-item:last-child {
+    border-bottom: none;
+}
+
+/* Behavior Patterns */
+.behavior-patterns {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.pattern-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pattern-item:last-child {
+    border-bottom: none;
+}
+
+/* Risk Alerts */
+.risk-alerts {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.alert-item:hover {
+    transform: translateX(5px);
+}
+
+.alert-item.high {
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-item.medium {
+    border-left: 4px solid var(--warning-color);
+}
+
+.alert-item.low {
+    border-left: 4px solid var(--success-color);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: var(--card-background);
+    border: 4px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal h2 {
+    color: var(--primary-color);
+    margin: 0 0 20px 0;
+    font-size: 20px;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.close:hover {
+    transform: scale(1.1);
+}
+
+/* Detail Table */
+.detail-table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--primary-color);
+}
+
+tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Buttons */
+.pixel-button {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    color: var(--background-color);
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.pixel-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 12px;
+    z-index: 2000;
+    animation: toastSlide 0.3s ease-out;
+    display: none;
+}
+
+.toast.show {
+    display: block;
+}
+
+.toast.success {
+    background: linear-gradient(45deg, #44FF44, #66FF66);
+    border: 2px solid var(--success-color);
+}
+
+.toast.error {
+    background: linear-gradient(45deg, #FF4444, #FF6666);
+    border: 2px solid var(--danger-color);
+}
+
+/* Animations */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastSlide {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .date-range {
+        flex-direction: column;
+    }
+
+    .card.large {
+        grid-column: span 1;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+}
+
+/* Chart Customization */
+.chart-tooltip {
+    background: var(--card-background) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    padding: 8px !important;
+    font-family: 'Press Start 2P', cursive !important;
+    font-size: 10px !important;
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: var(--primary-color);
+}
+
+.loading::before {
+    content: 'Loading...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    color: var(--primary-color);
+}

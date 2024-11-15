@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Slots: Crypto Spin Adventure</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/animations.css">
+    <link rel="stylesheet" href="/styles/symbols.css">
+    <link rel="stylesheet" href="/styles/pixel-symbols.css">
+    <link rel="stylesheet" href="/styles/ui.css">
+    <link rel="stylesheet" href="/styles/achievements.css">
+    <link rel="stylesheet" href="/styles/crypto.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="header">
+            <div id="user-info">
+                <span id="username"></span>
+                <span id="token-balance">Tokens: 0</span>
+            </div>
+            <div class="controls">
+                <button id="sound-toggle" class="pixel-button">🔊</button>
+                <button id="menu-button" class="pixel-button">Menu</button>
+            </div>
+        </div>
+
+        <div id="slot-machine">
+            <div id="jackpot-display">
+                Jackpot: <span id="jackpot-amount">10,000</span> Tokens
+            </div>
+            
+            <div id="reels-container">
+                <div class="reel" id="reel1">
+                    <div class="symbol-grid">
+                        <div class="pixel-symbol cherry"><div class="stem"></div></div>
+                        <div class="pixel-symbol lemon"></div>
+                        <div class="pixel-symbol orange"><div class="leaf"></div></div>
+                    </div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="symbol-grid">
+                        <div class="pixel-symbol plum"></div>
+                        <div class="pixel-symbol bell"></div>
+                        <div class="pixel-symbol seven"></div>
+                    </div>
+                </div>
+                <div class="reel" id="reel3">
+                    <div class="symbol-grid">
+                        <div class="pixel-symbol diamond"></div>
+                        <div class="pixel-symbol bitcoin"></div>
+                        <div class="pixel-symbol cherry"><div class="stem"></div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="controls">
+                <div id="bet-controls">
+                    <button id="decrease-bet" class="pixel-button">-</button>
+                    <div id="bet-display">
+                        <div>Current Bet</div>
+                        <span id="current-bet">10</span>
+                    </div>
+                    <button id="increase-bet" class="pixel-button">+</button>
+                </div>
+                <button id="spin-button" class="pixel-button">SPIN</button>
+            </div>
+
+            <div id="paytable">
+                <h3>Paytable</h3>
+                <div class="paytable-row">
+                    <div class="pixel-symbol bitcoin"></div>
+                    <span>x100 (Jackpot)</span>
+                </div>
+                <div class="paytable-row">
+                    <div class="pixel-symbol diamond"></div>
+                    <span>x50</span>
+                </div>
+                <div class="paytable-row">
+                    <div class="pixel-symbol seven"></div>
+                    <span>x20</span>
+                </div>
+                <div class="paytable-row">
+                    <div class="pixel-symbol bell"></div>
+                    <span>x10</span>
+                </div>
+                <div class="paytable-row">
+                    <div class="pixel-symbol plum"></div>
+                    <span>x5</span>
+                </div>
+                <div class="paytable-row">
+                    <div class="pixel-symbol orange"><div class="leaf"></div></div>
+                    <span>x4</span>
+                </div>
+                <div class="paytable-row">
+                    <div class="pixel-symbol lemon"></div>
+                    <span>x3</span>
+                </div>
+                <div class="paytable-row">
+                    <div class="pixel-symbol cherry"><div class="stem"></div></div>
+                    <span>x2</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-display" class="hidden">
+            <h2>YOU WIN!</h2>
+            <p id="win-amount"></p>
+        </div>
+
+        <div id="crypto-modal" class="hidden">
+            <div id="crypto-modal-content" class="crypto-section">
+                <!-- Content will be dynamically generated -->
+            </div>
+            <button id="close-crypto-modal" class="pixel-button">×</button>
+        </div>
+
+        <div id="menu" class="hidden">
+            <div class="menu-content">
+                <h2>Menu</h2>
+                <div class="menu-buttons">
+                    <button id="deposit-button" class="pixel-button">Deposit</button>
+                    <button id="withdraw-button" class="pixel-button">Withdraw</button>
+                    <button id="achievements-button" class="pixel-button">Achievements</button>
+                    <button id="settings-button" class="pixel-button">Settings</button>
+                    <button id="close-menu" class="pixel-button">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="achievements-container" class="hidden">
+            <div id="achievements-list">
+                <!-- Achievement categories will be dynamically added here -->
+            </div>
+            <button id="close-achievements" class="pixel-button">×</button>
+        </div>
+
+        <div id="achievement-popup" class="hidden achievement-notification">
+            <div class="achievement-popup-content">
+                <div id="achievement-icon"></div>
+                <div class="achievement-text">
+                    <h3>Achievement Unlocked!</h3>
+                    <p id="achievement-name"></p>
+                    <p id="achievement-reward"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="daily-reward-popup" class="hidden">
+            <div class="daily-reward-content">
+                <h3>Daily Reward!</h3>
+                <div class="reward-info">
+                    <p>Welcome back! Here's your daily reward:</p>
+                    <div class="reward-amount">
+                        <span id="daily-reward-amount">0</span> Tokens
+                    </div>
+                    <div class="streak-info">
+                        <p>Login Streak: <span id="login-streak">0</span> days</p>
+                        <p>Next Reward: <span id="next-reward">0</span> Tokens</p>
+                    </div>
+                </div>
+                <button id="collect-reward" class="pixel-button">Collect</button>
+            </div>
+        </div>
+
+        <div id="settings-menu" class="hidden">
+            <div class="menu-content">
+                <h2>Settings</h2>
+                <div class="setting-row">
+                    <label>Sound Volume</label>
+                    <input type="range" id="volume-slider" min="0" max="100" value="50">
+                </div>
+                <div class="setting-row">
+                    <label>Animation Speed</label>
+                    <select id="animation-speed">
+                        <option value="slow">Slow</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="fast">Fast</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label>High Contrast Mode</label>
+                    <input type="checkbox" id="high-contrast">
+                </div>
+                <button id="close-settings" class="pixel-button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/audioManager.js"></script>
+    <script src="/js/particleSystem.js"></script>
+    <script src="/js/achievementsUI.js"></script>
+    <script src="/js/cryptoUI.js"></script>
+    <script src="/js/game.js"></script>
+</body>
+</html>

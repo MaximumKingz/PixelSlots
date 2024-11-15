@@ -1,0 +1,308 @@
+/* Achievements Container */
+#achievements-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Achievements List */
+#achievements-list {
+    background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+    border: 4px solid #4a4a4a;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Achievement Category */
+.achievement-category {
+    margin-bottom: 30px;
+}
+
+.achievement-category h3 {
+    color: #FFD700;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Achievements Grid */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+/* Achievement Item */
+.achievement-item {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #4a4a4a;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+}
+
+.achievement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border-color: #666;
+}
+
+.achievement-item.unlocked {
+    border-color: #FFD700;
+    background: linear-gradient(45deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+}
+
+/* Achievement Icon */
+.achievement-icon {
+    font-size: 24px;
+    margin-right: 15px;
+    filter: grayscale(1);
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.achievement-item.unlocked .achievement-icon {
+    filter: grayscale(0);
+    opacity: 1;
+}
+
+/* Achievement Info */
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-info h4 {
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.achievement-info p {
+    color: #aaaaaa;
+    font-size: 12px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+/* Progress Bar */
+.achievement-progress {
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: #aaaaaa;
+    font-size: 10px;
+}
+
+/* Achievement Reward */
+.achievement-reward {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reward-amount {
+    color: #FFD700;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+}
+
+.streak-bonus {
+    color: #FFA500;
+    font-size: 10px;
+    padding: 2px 6px;
+    background: rgba(255, 165, 0, 0.2);
+    border-radius: 4px;
+    cursor: help;
+}
+
+/* Achievement Popup */
+#achievement-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    padding: 15px;
+    z-index: 2000;
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#achievement-popup.achievement-popup-show {
+    transform: translateX(0);
+    animation: achievementShake 0.5s ease-in-out;
+}
+
+#achievement-popup.achievement-popup-hide {
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+}
+
+@keyframes achievementShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Close Button */
+#close-achievements {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+#close-achievements:hover {
+    transform: scale(1.1);
+}
+
+/* Scrollbar Styling */
+#achievements-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#achievements-list::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+#achievements-list::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+    border-radius: 4px;
+}
+
+#achievements-list::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 600px) {
+    #achievements-list {
+        width: 90%;
+        padding: 15px;
+    }
+
+    .achievement-category h3 {
+        font-size: 14px;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .achievement-item {
+        padding: 10px;
+    }
+
+    .achievement-info h4 {
+        font-size: 12px;
+    }
+
+    .achievement-info p {
+        font-size: 10px;
+    }
+
+    .reward-amount {
+        font-size: 10px;
+    }
+
+    #achievement-popup {
+        width: 80%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-120%);
+    }
+
+    #achievement-popup.achievement-popup-show {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    #achievement-popup.achievement-popup-hide {
+        transform: translateX(-50%) translateY(-120%);
+    }
+}
+
+/* High Contrast Mode */
+.high-contrast .achievement-item {
+    border-color: #ffffff;
+    background: #000000;
+}
+
+.high-contrast .achievement-item.unlocked {
+    border-color: #ffffff;
+    background: #000000;
+}
+
+.high-contrast .progress-fill {
+    background: #ffffff;
+}
+
+.high-contrast .achievement-info h4 {
+    color: #ffffff;
+}
+
+.high-contrast .achievement-info p {
+    color: #ffffff;
+}
+
+.high-contrast .reward-amount {
+    color: #ffffff;
+}
+
+.high-contrast .streak-bonus {
+    color: #ffffff;
+    background: #000000;
+    border: 1px solid #ffffff;
+}
+
+/* Animation Speed Settings */
+[data-animation-speed="slow"] .achievement-popup-show {
+    animation-duration: 1s;
+}
+
+[data-animation-speed="normal"] .achievement-popup-show {
+    animation-duration: 0.5s;
+}
+
+[data-animation-speed="fast"] .achievement-popup-show {
+    animation-duration: 0.3s;
+}

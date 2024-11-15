@@ -1,0 +1,194 @@
+/* Symbol Grid Layout */
+.symbol-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: #000;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.symbol {
+    width: 64px;
+    height: 64px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+}
+
+/* Symbol Styles */
+.symbol-cherry { background-color: #FF0000; }
+.symbol-lemon { background-color: #FFD700; }
+.symbol-orange { background-color: #FFA500; }
+.symbol-plum { background-color: #800080; }
+.symbol-bell { background-color: #FFD700; }
+.symbol-seven { background-color: #FF0000; }
+.symbol-diamond { background-color: #00FFFF; }
+.symbol-bitcoin { background-color: #F7931A; }
+
+/* Symbol Animation */
+@keyframes symbolSpin {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+.symbol.spinning {
+    animation: symbolSpin 0.5s ease-in-out;
+}
+
+/* Win Highlight */
+@keyframes symbolWin {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.5); }
+    100% { filter: brightness(1); }
+}
+
+.symbol.winning {
+    animation: symbolWin 0.5s ease-in-out infinite;
+}
+
+/* Symbol Grid in Reels */
+.reel .symbol-grid {
+    transition: transform 0.3s ease-out;
+}
+
+.reel.spinning .symbol-grid {
+    transform: translateY(-100%);
+    transition: transform 0s linear;
+}
+
+/* Symbol Placeholder Animation */
+@keyframes symbolPlaceholder {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+
+.symbol-placeholder {
+    background: #333;
+    animation: symbolPlaceholder 1s infinite;
+}
+
+/* Symbol Text */
+.symbol-text {
+    font-family: 'Press Start 2P', cursive;
+    color: white;
+    text-align: center;
+    line-height: 64px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+/* Jackpot Symbol Special Effects */
+.symbol-bitcoin.jackpot {
+    animation: symbolWin 0.3s ease-in-out infinite;
+    box-shadow: 0 0 20px #F7931A;
+}
+
+/* Symbol Grid Loading State */
+.symbol-grid.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.symbol-grid.loading .symbol {
+    animation: symbolPlaceholder 1s infinite;
+}
+
+/* Symbol Size Variations */
+.symbol-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.symbol-lg {
+    width: 96px;
+    height: 96px;
+}
+
+/* Symbol Border Effects */
+.symbol {
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.symbol:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Symbol Content */
+.symbol::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 80%;
+}
+
+.symbol-cherry::before { content: '🍒'; }
+.symbol-lemon::before { content: '🍋'; }
+.symbol-orange::before { content: '🍊'; }
+.symbol-plum::before { content: '🍇'; }
+.symbol-bell::before { content: '🔔'; }
+.symbol-seven::before { content: '7'; }
+.symbol-diamond::before { content: '💎'; }
+.symbol-bitcoin::before { content: '₿'; }
+
+/* Symbol Grid Transitions */
+.symbol-grid {
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.symbol-grid.hidden {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+/* Symbol Highlight Effects */
+.symbol.highlight {
+    position: relative;
+    overflow: hidden;
+}
+
+.symbol.highlight::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+    animation: highlightSweep 1s linear infinite;
+}
+
+@keyframes highlightSweep {
+    0% { transform: rotate(0) translate(-50%, -50%); }
+    100% { transform: rotate(360deg) translate(-50%, -50%); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .symbol {
+        width: 48px;
+        height: 48px;
+    }
+
+    .symbol-sm {
+        width: 24px;
+        height: 24px;
+    }
+
+    .symbol-lg {
+        width: 72px;
+        height: 72px;
+    }
+}

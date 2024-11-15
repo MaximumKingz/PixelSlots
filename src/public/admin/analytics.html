@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Slots Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles/analytics.css">
+</head>
+<body>
+    <div class="analytics-dashboard">
+        <header>
+            <h1>Analytics Dashboard</h1>
+            <div class="controls">
+                <div class="date-range">
+                    <input type="date" id="start-date">
+                    <input type="date" id="end-date">
+                </div>
+                <select id="currency-select">
+                    <option value="BTC">Bitcoin (BTC)</option>
+                    <option value="ETH">Ethereum (ETH)</option>
+                    <option value="USDT">Tether (USDT)</option>
+                    <option value="USDC">USD Coin (USDC)</option>
+                    <option value="MATIC">Polygon (MATIC)</option>
+                </select>
+                <button id="export-data" class="pixel-button">Export Data</button>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Financial Overview -->
+            <div class="card large">
+                <h3>Financial Overview</h3>
+                <div class="chart-container">
+                    <canvas id="financial-chart"></canvas>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <span class="label">Total Volume</span>
+                        <span id="total-volume" class="value">0.00</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Net Profit</span>
+                        <span id="net-profit" class="value">0.00</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">RTP</span>
+                        <span id="rtp-rate" class="value">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Activity -->
+            <div class="card">
+                <h3>User Activity</h3>
+                <div class="chart-container">
+                    <canvas id="user-activity-chart"></canvas>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <span class="label">Active Users</span>
+                        <span id="active-users" class="value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">New Users</span>
+                        <span id="new-users" class="value">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Performance -->
+            <div class="card">
+                <h3>Game Performance</h3>
+                <div class="chart-container">
+                    <canvas id="game-performance-chart"></canvas>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <span class="label">Total Games</span>
+                        <span id="total-games" class="value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Avg Bet</span>
+                        <span id="avg-bet" class="value">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Triggers -->
+            <div class="card">
+                <h3>Feature Triggers</h3>
+                <div class="chart-container">
+                    <canvas id="feature-triggers-chart"></canvas>
+                </div>
+                <div class="feature-list" id="feature-list">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Jackpot Stats -->
+            <div class="card">
+                <h3>Jackpot Statistics</h3>
+                <div class="chart-container">
+                    <canvas id="jackpot-chart"></canvas>
+                </div>
+                <div class="jackpot-winners" id="jackpot-winners">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- User Behavior -->
+            <div class="card large">
+                <h3>User Behavior</h3>
+                <div class="chart-container">
+                    <canvas id="behavior-chart"></canvas>
+                </div>
+                <div class="behavior-patterns" id="behavior-patterns">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Risk Analysis -->
+            <div class="card">
+                <h3>Risk Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="risk-chart"></canvas>
+                </div>
+                <div class="risk-alerts" id="risk-alerts">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Retention Analysis -->
+            <div class="card">
+                <h3>User Retention</h3>
+                <div class="chart-container">
+                    <canvas id="retention-chart"></canvas>
+                </div>
+                <div class="retention-stats" id="retention-stats">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed View Modal -->
+        <div id="detail-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modal-title">Detailed View</h2>
+                <div class="modal-body">
+                    <div class="chart-container">
+                        <canvas id="detail-chart"></canvas>
+                    </div>
+                    <div class="detail-stats" id="detail-stats">
+                        <!-- Dynamically populated -->
+                    </div>
+                    <div class="detail-table-container">
+                        <table id="detail-table">
+                            <!-- Dynamically populated -->
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="export-details" class="pixel-button">Export Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Feedback -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="/admin/js/analyticsCharts.js"></script>
+    <script src="/admin/js/analyticsData.js"></script>
+    <script src="/admin/js/analyticsExport.js"></script>
+    <script src="/admin/js/analytics.js"></script>
+</body>
+</html>

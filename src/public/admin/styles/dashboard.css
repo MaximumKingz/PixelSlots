@@ -1,0 +1,447 @@
+/* Dashboard Layout */
+:root {
+    --primary-color: #FFD700;
+    --secondary-color: #4a4a4a;
+    --background-color: #1a1a1a;
+    --card-background: #2a2a2a;
+    --text-color: #ffffff;
+    --success-color: #44FF44;
+    --warning-color: #FFAA00;
+    --danger-color: #FF4444;
+    --border-color: #4a4a4a;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', cursive;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+.dashboard {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background: linear-gradient(45deg, #2a2a2a, #3a3a3a);
+    padding: 20px;
+    border-bottom: 4px solid var(--border-color);
+}
+
+header h1 {
+    color: var(--primary-color);
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-box .label {
+    font-size: 12px;
+    color: #aaaaaa;
+}
+
+.stat-box .value {
+    font-size: 16px;
+    color: var(--primary-color);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Cards */
+.card {
+    background: var(--card-background);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card.large {
+    grid-column: span 2;
+}
+
+.card h3 {
+    color: var(--primary-color);
+    margin: 0 0 15px 0;
+    font-size: 16px;
+}
+
+/* Network Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.network-stat {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.network-stat .name {
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-bottom: 5px;
+}
+
+.network-stat .value {
+    font-size: 14px;
+    color: var(--primary-color);
+}
+
+/* Transaction List */
+.transaction-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.transaction-filters select {
+    background: #333;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px;
+    color: var(--text-color);
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+}
+
+.transactions-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.transaction-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.transaction-item:hover {
+    transform: translateX(5px);
+}
+
+.transaction-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.transaction-info .type {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.transaction-info .amount {
+    color: var(--primary-color);
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.transaction-info .status {
+    font-size: 12px;
+}
+
+.transaction-info .status.pending {
+    color: var(--warning-color);
+}
+
+.transaction-info .status.completed {
+    color: var(--success-color);
+}
+
+.transaction-info .status.failed {
+    color: var(--danger-color);
+}
+
+/* Alerts */
+.alerts-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.alert-item:hover {
+    transform: translateX(5px);
+}
+
+.alert-item .title {
+    font-size: 14px;
+    color: var(--danger-color);
+    margin-bottom: 5px;
+}
+
+.alert-item .description {
+    font-size: 12px;
+    color: #aaaaaa;
+}
+
+/* Price Monitor */
+.price-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.price-item {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+}
+
+.price-item .symbol {
+    font-size: 14px;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.price-item .price {
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.price-item .change {
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+.price-item .change.positive {
+    color: var(--success-color);
+}
+
+.price-item .change.negative {
+    color: var(--danger-color);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: var(--card-background);
+    border: 4px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+}
+
+.modal h2 {
+    color: var(--primary-color);
+    margin: 0 0 20px 0;
+    font-size: 20px;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.close:hover {
+    transform: scale(1.1);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Buttons */
+.pixel-button {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    color: var(--background-color);
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.pixel-button:hover {
+    transform: translateY(-2px);
+}
+
+.pixel-button.danger {
+    background: var(--danger-color);
+}
+
+.pixel-button.success {
+    background: var(--success-color);
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 12px;
+    z-index: 2000;
+    animation: toastSlide 0.3s ease-out;
+    display: none;
+}
+
+.toast.show {
+    display: block;
+}
+
+.toast.success {
+    background: linear-gradient(45deg, #44FF44, #66FF66);
+    border: 2px solid var(--success-color);
+}
+
+.toast.error {
+    background: linear-gradient(45deg, #FF4444, #FF6666);
+    border: 2px solid var(--danger-color);
+}
+
+/* Animations */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toastSlide {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .card.large {
+        grid-column: span 1;
+    }
+
+    .transaction-filters {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+}
+
+/* High Contrast Mode */
+.high-contrast {
+    --background-color: #000000;
+    --card-background: #000000;
+    --border-color: #ffffff;
+    --text-color: #ffffff;
+    --primary-color: #ffffff;
+}
+
+.high-contrast .transaction-item,
+.high-contrast .alert-item,
+.high-contrast .price-item {
+    background: #000000;
+    border: 1px solid #ffffff;
+}
+
+/* Animation Speed Settings */
+[data-animation-speed="slow"] .modal,
+[data-animation-speed="slow"] .toast {
+    animation-duration: 0.6s;
+}
+
+[data-animation-speed="normal"] .modal,
+[data-animation-speed="normal"] .toast {
+    animation-duration: 0.3s;
+}
+
+[data-animation-speed="fast"] .modal,
+[data-animation-speed="fast"] .toast {
+    animation-duration: 0.15s;
+}

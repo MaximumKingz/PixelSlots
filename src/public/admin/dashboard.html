@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Slots Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/admin/styles/dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header>
+            <h1>Pixel Slots Admin Dashboard</h1>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <span class="label">24h Volume</span>
+                    <span id="total-volume" class="value">0.00 BTC</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">Active Users</span>
+                    <span id="active-users" class="value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="label">Pending Tx</span>
+                    <span id="pending-tx" class="value">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="grid">
+                <!-- Transaction Volume Chart -->
+                <div class="card large">
+                    <h3>Transaction Volume (24h)</h3>
+                    <canvas id="volume-chart"></canvas>
+                </div>
+
+                <!-- Network Stats -->
+                <div class="card">
+                    <h3>Network Stats</h3>
+                    <div id="network-stats" class="stats-grid">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Failure Rates -->
+                <div class="card">
+                    <h3>Failure Rates</h3>
+                    <canvas id="failure-chart"></canvas>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="card large">
+                    <h3>Recent Transactions</h3>
+                    <div class="transaction-filters">
+                        <select id="tx-type-filter">
+                            <option value="all">All Types</option>
+                            <option value="deposit">Deposits</option>
+                            <option value="withdrawal">Withdrawals</option>
+                        </select>
+                        <select id="currency-filter">
+                            <option value="all">All Currencies</option>
+                            <option value="BTC">Bitcoin</option>
+                            <option value="ETH">Ethereum</option>
+                            <option value="USDT">USDT</option>
+                            <option value="USDC">USDC</option>
+                            <option value="MATIC">MATIC</option>
+                        </select>
+                        <select id="status-filter">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </div>
+                    <div class="transactions-list" id="transactions">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div class="card">
+                    <h3>Active Alerts</h3>
+                    <div id="alerts" class="alerts-list">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Price Monitor -->
+                <div class="card">
+                    <h3>Price Monitor</h3>
+                    <div id="price-monitor" class="price-grid">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Details Modal -->
+        <div id="tx-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Transaction Details</h2>
+                <div id="tx-details">
+                    <!-- Dynamically populated -->
+                </div>
+                <div class="modal-actions">
+                    <button id="retry-tx" class="pixel-button">Retry Transaction</button>
+                    <button id="cancel-tx" class="pixel-button danger">Cancel Transaction</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Details Modal -->
+        <div id="alert-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Alert Details</h2>
+                <div id="alert-details">
+                    <!-- Dynamically populated -->
+                </div>
+                <div class="modal-actions">
+                    <button id="acknowledge-alert" class="pixel-button">Acknowledge</button>
+                    <button id="resolve-alert" class="pixel-button success">Mark Resolved</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Feedback -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="/admin/js/charts.js"></script>
+    <script src="/admin/js/transactions.js"></script>
+    <script src="/admin/js/alerts.js"></script>
+    <script src="/admin/js/prices.js"></script>
+    <script src="/admin/js/dashboard.js"></script>
+</body>
+</html>

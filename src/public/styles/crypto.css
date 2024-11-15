@@ -1,0 +1,390 @@
+/* Crypto Modal */
+#crypto-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+#crypto-modal.show {
+    display: flex;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Modal Content */
+.crypto-section {
+    background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+    border: 4px solid #4a4a4a;
+    border-radius: 12px;
+    padding: 25px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Close Button */
+#close-crypto-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+#close-crypto-modal:hover {
+    transform: scale(1.1);
+}
+
+/* Headers */
+.crypto-section h2 {
+    color: #FFD700;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Network Selection */
+.network-selection {
+    margin-bottom: 20px;
+}
+
+.network-selection label {
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.network-selection select {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    border: 2px solid #4a4a4a;
+    border-radius: 6px;
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* Address Section */
+.address-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#qr-code-container {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.address-display {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#address-display {
+    flex: 1;
+    padding: 10px;
+    background: #333;
+    border: 2px solid #4a4a4a;
+    border-radius: 6px;
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 14px;
+    text-align: center;
+}
+
+#copy-address {
+    padding: 10px 15px;
+    font-size: 12px;
+}
+
+/* Minimum Amounts */
+.minimum-deposit,
+.minimum-withdrawal {
+    color: #aaaaaa;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+/* Timer */
+.expiry-timer {
+    color: #FFD700;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+/* Withdrawal Form */
+#withdrawal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.amount-input,
+.address-input {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.amount-input label,
+.address-input label {
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+}
+
+.amount-input input,
+.address-input input {
+    padding: 10px;
+    background: #333;
+    border: 2px solid #4a4a4a;
+    border-radius: 6px;
+    color: #ffffff;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.amount-input input.error,
+.address-input input.error {
+    border-color: #FF4444;
+}
+
+/* Fee Display */
+.fee-display {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+.fee-display p {
+    color: #aaaaaa;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.fee-display span {
+    color: #FFD700;
+    font-family: monospace;
+}
+
+/* Submit Button */
+#submit-withdrawal {
+    width: 100%;
+    padding: 15px;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Pending Transactions */
+.pending-section {
+    margin-top: 30px;
+}
+
+.pending-section h3 {
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.transactions-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.transaction-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transaction-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.transaction-info .amount {
+    color: #FFD700;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.transaction-info .network {
+    color: #aaaaaa;
+    font-size: 12px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.transaction-info .status {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.transaction-time {
+    color: #aaaaaa;
+    font-size: 12px;
+}
+
+.no-transactions {
+    color: #aaaaaa;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: #ffffff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    animation: notificationSlide 0.3s ease-out;
+    z-index: 2100;
+}
+
+.notification.error {
+    background: linear-gradient(45deg, #FF4444, #FF6666);
+    border: 2px solid #FF4444;
+}
+
+.notification.success {
+    background: linear-gradient(45deg, #44FF44, #66FF66);
+    border: 2px solid #44FF44;
+}
+
+@keyframes notificationSlide {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* High Contrast Mode */
+.high-contrast .crypto-section {
+    background: #000000;
+    border-color: #ffffff;
+}
+
+.high-contrast .network-selection select,
+.high-contrast #address-display,
+.high-contrast .amount-input input,
+.high-contrast .address-input input {
+    background: #000000;
+    border-color: #ffffff;
+}
+
+.high-contrast .fee-display {
+    background: #000000;
+    border: 1px solid #ffffff;
+}
+
+.high-contrast .transaction-item {
+    background: #000000;
+    border-color: #ffffff;
+}
+
+.high-contrast .transaction-info .network {
+    background: #000000;
+    border: 1px solid #ffffff;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 600px) {
+    .crypto-section {
+        padding: 15px;
+        width: 95%;
+    }
+
+    .crypto-section h2 {
+        font-size: 16px;
+    }
+
+    .network-selection label,
+    .amount-input label,
+    .address-input label {
+        font-size: 12px;
+    }
+
+    #qr-code-container {
+        padding: 10px;
+    }
+
+    #qr-code-container img {
+        width: 150px;
+        height: 150px;
+    }
+
+    .address-display {
+        flex-direction: column;
+    }
+
+    #copy-address {
+        width: 100%;
+    }
+
+    .transaction-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .transaction-time {
+        font-size: 10px;
+    }
+}
+
+/* Animation Speed Settings */
+[data-animation-speed="slow"] .notification {
+    animation-duration: 0.6s;
+}
+
+[data-animation-speed="normal"] .notification {
+    animation-duration: 0.3s;
+}
+
+[data-animation-speed="fast"] .notification {
+    animation-duration: 0.15s;
+}

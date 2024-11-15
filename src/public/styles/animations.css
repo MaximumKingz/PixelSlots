@@ -1,0 +1,176 @@
+/* Reel Animations */
+@keyframes spin {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-1000px);
+    }
+}
+
+.reel.spinning {
+    animation: spin 0.5s linear infinite;
+}
+
+/* Symbol Animations */
+@keyframes symbolPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.symbol.winning {
+    animation: symbolPulse 0.5s ease-in-out infinite;
+}
+
+/* Win Effects */
+@keyframes coinRain {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+.coin-particle {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    background: url('../images/symbols/coin-particle.png');
+    pointer-events: none;
+}
+
+/* Jackpot Animation */
+@keyframes jackpotBurst {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.jackpot-burst {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #ffd700, transparent);
+    animation: jackpotBurst 1s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Button Hover Effects */
+@keyframes buttonHover {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+    100% { transform: translateY(0); }
+}
+
+.pixel-button:hover {
+    animation: buttonHover 1s infinite;
+}
+
+/* Achievement Unlock Animation */
+@keyframes achievementSlide {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    10% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    90% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ffd700;
+    padding: 15px;
+    border-radius: 8px;
+    animation: achievementSlide 5s forwards;
+}
+
+/* Reel Stop Effect */
+@keyframes reelStop {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(5px); }
+    50% { transform: translateY(-3px); }
+    75% { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+}
+
+.reel.stopping {
+    animation: reelStop 0.3s ease-out;
+}
+
+/* Symbol Grid Animation */
+.symbol-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    padding: 5px;
+}
+
+.symbol-cell {
+    aspect-ratio: 1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+}
+
+/* Win Line Animation */
+@keyframes winLine {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.win-line {
+    position: absolute;
+    height: 3px;
+    background: #ffd700;
+    animation: winLine 1s infinite;
+}
+
+/* Balance Update Animation */
+@keyframes balanceUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.balance-update {
+    animation: balanceUpdate 0.5s ease-out;
+}
+
+/* Menu Transition */
+@keyframes menuSlide {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+.menu-content {
+    animation: menuSlide 0.3s ease-out;
+}

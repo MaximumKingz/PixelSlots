@@ -1,0 +1,292 @@
+/* Base Pixel Symbol */
+.pixel-symbol {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    image-rendering: pixelated;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Cherry Symbol */
+.pixel-symbol.cherry {
+    --cherry-red: #ff0000;
+    --cherry-dark: #cc0000;
+    --stem-green: #228B22;
+}
+
+.pixel-symbol.cherry::before,
+.pixel-symbol.cherry::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--cherry-red);
+    border-radius: 50%;
+    bottom: 6px;
+}
+
+.pixel-symbol.cherry::before {
+    left: 6px;
+    box-shadow: 
+        inset -2px -2px var(--cherry-dark),
+        2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pixel-symbol.cherry::after {
+    right: 6px;
+    box-shadow: 
+        inset -2px -2px var(--cherry-dark),
+        2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pixel-symbol.cherry .stem {
+    position: absolute;
+    width: 2px;
+    height: 12px;
+    background: var(--stem-green);
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-15deg);
+}
+
+/* Lemon Symbol */
+.pixel-symbol.lemon {
+    --lemon-yellow: #FFD700;
+    --lemon-dark: #DAA520;
+}
+
+.pixel-symbol.lemon::before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 18px;
+    background: var(--lemon-yellow);
+    border-radius: 12px / 9px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        inset -2px -2px var(--lemon-dark),
+        2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Orange Symbol */
+.pixel-symbol.orange {
+    --orange-color: #FFA500;
+    --orange-dark: #FF8C00;
+    --leaf-green: #228B22;
+}
+
+.pixel-symbol.orange::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: var(--orange-color);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        inset -2px -2px var(--orange-dark),
+        2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pixel-symbol.orange .leaf {
+    position: absolute;
+    width: 6px;
+    height: 8px;
+    background: var(--leaf-green);
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+/* Seven Symbol */
+.pixel-symbol.seven {
+    --seven-red: #FF0000;
+    --seven-light: #FF4444;
+}
+
+.pixel-symbol.seven::before {
+    content: '7';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 20px;
+    color: var(--seven-red);
+    text-shadow: 
+        -1px -1px 0 var(--seven-light),
+        2px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Bell Symbol */
+.pixel-symbol.bell {
+    --bell-gold: #FFD700;
+    --bell-dark: #DAA520;
+    --bell-brown: #8B4513;
+}
+
+.pixel-symbol.bell::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: var(--bell-gold);
+    border-radius: 10px 10px 8px 8px;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 
+        inset -2px -2px var(--bell-dark),
+        2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pixel-symbol.bell::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--bell-brown);
+    border-radius: 50%;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Diamond Symbol */
+.pixel-symbol.diamond {
+    --diamond-blue: #00FFFF;
+    --diamond-light: #99FFFF;
+    --diamond-dark: #00CCCC;
+}
+
+.pixel-symbol.diamond::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: var(--diamond-blue);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    box-shadow: 
+        inset -2px -2px var(--diamond-dark),
+        2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pixel-symbol.diamond::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--diamond-light);
+    top: 50%;
+    left: 50%;
+    transform: translate(-65%, -65%) rotate(45deg);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    opacity: 0.5;
+}
+
+/* Bitcoin Symbol */
+.pixel-symbol.bitcoin {
+    --bitcoin-orange: #F7931A;
+    --bitcoin-light: #FFA533;
+    --bitcoin-dark: #CC7A16;
+}
+
+.pixel-symbol.bitcoin::before {
+    content: '₿';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--bitcoin-orange);
+    text-shadow: 
+        -1px -1px 0 var(--bitcoin-light),
+        2px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Plum Symbol */
+.pixel-symbol.plum {
+    --plum-purple: #800080;
+    --plum-light: #A020A0;
+    --plum-dark: #600060;
+}
+
+.pixel-symbol.plum::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--plum-purple);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        inset -2px -2px var(--plum-dark),
+        2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pixel-symbol.plum::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--plum-light);
+    border-radius: 50%;
+    top: 8px;
+    left: 8px;
+    opacity: 0.3;
+}
+
+/* Animation States */
+.pixel-symbol.spinning {
+    animation: symbolSpin 0.2s linear infinite;
+}
+
+.pixel-symbol.winning {
+    animation: symbolPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes symbolSpin {
+    0% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+@keyframes symbolPulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.1); filter: brightness(1.2); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .pixel-symbol {
+        width: 24px;
+        height: 24px;
+    }
+
+    .pixel-symbol.seven::before,
+    .pixel-symbol.bitcoin::before {
+        font-size: 14px;
+    }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .pixel-symbol {
+        image-rendering: crisp-edges;
+    }
+}
