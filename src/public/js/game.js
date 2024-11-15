@@ -9,15 +9,19 @@ class PixelSlots {
             '7️⃣': 20,
             '🎰': 50
         };
-        this.balance = 1.0;
-        this.bet = 0.001;
-        this.jackpot = 1.0;
+        this.balance = 10.00;
+        this.bet = 0.10;
+        this.jackpot = 1000.00;
         this.isSpinning = false;
         this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
         
         this.initializeGame();
         this.setupTelegram();
+    }
+
+    formatMoney(amount) {
+        return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     setupTelegram() {
@@ -68,8 +72,8 @@ class PixelSlots {
         this.spinButton.addEventListener('click', () => this.spin());
         this.autoPlayButton.addEventListener('click', () => this.toggleAutoPlay());
         this.maxBetButton.addEventListener('click', () => this.setMaxBet());
-        this.decreaseBetButton.addEventListener('click', () => this.adjustBet(-0.001));
-        this.increaseBetButton.addEventListener('click', () => this.adjustBet(0.001));
+        this.decreaseBetButton.addEventListener('click', () => this.adjustBet(-0.10));
+        this.increaseBetButton.addEventListener('click', () => this.adjustBet(0.10));
         this.collectWinButton.addEventListener('click', () => this.hideWinDisplay());
 
         // Set initial symbols
@@ -93,7 +97,7 @@ class PixelSlots {
         this.updateBalance(this.balance - this.bet);
 
         // Keep jackpot constant
-        this.updateJackpot(1.0);
+        this.updateJackpot(1000.00);
 
         try {
             // Start spinning animation
@@ -184,9 +188,9 @@ class PixelSlots {
     }
 
     handleJackpotWin() {
-        const winAmount = 1.0; // Fixed jackpot amount
+        const winAmount = 1000.00; // Fixed jackpot amount
         this.updateBalance(this.balance + winAmount);
-        this.updateJackpot(1.0); // Keep jackpot constant
+        this.updateJackpot(1000.00); // Keep jackpot constant
         this.showWinDisplay(winAmount, true);
         window.audioManager?.playJackpotSound();
         this.webApp.HapticFeedback.notificationOccurred('success');
@@ -204,7 +208,7 @@ class PixelSlots {
         this.hideWinDisplay();
         
         // Set content
-        this.winAmount.textContent = `${amount.toFixed(8)} BTC`;
+        this.winAmount.textContent = this.formatMoney(amount);
         this.winOverlay.querySelector('h2').textContent = isJackpot ? '🎉 JACKPOT! 🎉' : '🎉 BIG WIN! 🎉';
         
         // Show overlay
@@ -234,7 +238,7 @@ class PixelSlots {
     }
 
     setMaxBet() {
-        const maxPossibleBet = Math.floor(this.balance * 1000) / 1000;
+        const maxPossibleBet = Math.floor(this.balance * 100) / 100;
         if (maxPossibleBet !== this.bet) {
             this.bet = maxPossibleBet;
             this.updateBetDisplay();
@@ -243,7 +247,7 @@ class PixelSlots {
     }
 
     adjustBet(amount) {
-        const newBet = Math.max(0.001, Math.min(this.bet + amount, this.balance));
+        const newBet = Math.max(0.10, Math.min(this.bet + amount, this.balance));
         if (newBet !== this.bet) {
             this.bet = newBet;
             this.updateBetDisplay();
@@ -252,17 +256,17 @@ class PixelSlots {
     }
 
     updateBetDisplay() {
-        this.currentBetDisplay.textContent = `${this.bet.toFixed(3)} BTC`;
+        this.currentBetDisplay.textContent = this.formatMoney(this.bet);
     }
 
     updateBalance(amount) {
         this.balance = amount;
-        this.balanceDisplay.textContent = `${this.balance.toFixed(3)} BTC`;
+        this.balanceDisplay.textContent = this.formatMoney(this.balance);
     }
 
     updateJackpot(amount) {
         this.jackpot = amount;
-        this.jackpotDisplay.textContent = `${this.jackpot.toFixed(3)} BTC`;
+        this.jackpotDisplay.textContent = this.formatMoney(this.jackpot);
     }
 
     delay(ms) {
