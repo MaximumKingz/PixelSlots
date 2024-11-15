@@ -91,26 +91,49 @@ class PixelSlots {
         this.jackpot += this.bet * 0.1;
         this.updateJackpot(this.jackpot);
 
+        // Generate final symbols
+        const finalSymbols = this.reels.map(() => this.getRandomSymbol());
+
         // Start spinning animation
-        this.reels.forEach(reel => reel.classList.add('spinning'));
+        this.reels.forEach(reel => {
+            reel.classList.add('spinning');
+            const content = reel.querySelector('.reel-content');
+            content.style.transitionDuration = '0s';
+            content.style.transform = 'translateY(0)';
+        });
 
         // Play spin sound
         window.audioManager?.playSpinSound();
 
-        // Generate final symbols
-        const finalSymbols = this.reels.map(() => this.getRandomSymbol());
-
         // Stop reels one by one
         for (let i = 0; i < this.reels.length; i++) {
             await this.delay(400);
-            this.reels[i].classList.remove('spinning');
-            this.reels[i].querySelector('.symbol').textContent = finalSymbols[i];
+
+            const reel = this.reels[i];
+            const content = reel.querySelector('.reel-content');
+            const symbols = content.querySelectorAll('.symbol');
+
+            // Calculate final position
+            const symbolHeight = symbols[0].offsetHeight;
+            const finalIndex = this.symbols.indexOf(finalSymbols[i]);
+            const finalOffset = -symbolHeight * finalIndex;
+
+            // Smooth stop animation
+            content.style.transitionDuration = '0.5s';
+            content.style.transitionTimingFunction = 'cubic-bezier(0.5, 0, 0.5, 1)';
+            content.style.transform = `translateY(${finalOffset}px)`;
+
+            reel.classList.remove('spinning');
             window.audioManager?.playStopSound();
             this.webApp.HapticFeedback.impactOccurred('rigid');
+
+            // Update first and last symbols for next spin
+            symbols[0].textContent = finalSymbols[i];
+            symbols[symbols.length - 1].textContent = finalSymbols[i];
         }
 
         // Check for wins
-        await this.delay(300);
+        await this.delay(500);
         this.checkWin(finalSymbols);
 
         this.isSpinning = false;
@@ -123,14 +146,19 @@ class PixelSlots {
     }
 
     checkWin(symbols) {
+        // Remove previous win animations
+        this.reels.forEach(reel => reel.classList.remove('win'));
+
         // Check for jackpot
         if (symbols.every(symbol => symbol === '🎰')) {
+            this.reels.forEach(reel => reel.classList.add('win'));
             this.handleJackpotWin();
             return;
         }
 
         // Check for regular win
         if (symbols.every(symbol => symbol === symbols[0])) {
+            this.reels.forEach(reel => reel.classList.add('win'));
             const multiplier = this.symbolValues[symbols[0]];
             const winAmount = this.bet * multiplier;
             this.handleWin(winAmount);
@@ -140,6 +168,12 @@ class PixelSlots {
         // Check for partial wins
         const matches = symbols.filter(symbol => symbol === symbols[0]).length;
         if (matches === 2) {
+            // Add win animation only to matching reels
+            symbols.forEach((symbol, index) => {
+                if (symbol === symbols[0]) {
+                    this.reels[index].classList.add('win');
+                }
+            });
             const multiplier = this.symbolValues[symbols[0]] / 2;
             const winAmount = this.bet * multiplier;
             this.handleWin(winAmount);

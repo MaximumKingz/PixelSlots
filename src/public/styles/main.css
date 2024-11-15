@@ -122,23 +122,65 @@ body {
     align-items: center;
 }
 
+.reel-content {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.1s linear;
+}
+
 .symbol {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 48px;
-    line-height: 1;
-    transform-origin: center;
-    transition: transform 0.3s ease;
+    padding: 10px;
 }
 
-.reel.spinning .symbol {
-    animation: spinSymbol 0.2s linear infinite;
+.reel.spinning .reel-content {
+    animation: spin 0.1s linear infinite;
 }
 
-@keyframes spinSymbol {
+@keyframes spin {
     0% {
-        transform: translateY(-100%) scale(1);
+        transform: translateY(0%);
     }
     100% {
-        transform: translateY(100%) scale(1);
+        transform: translateY(-100%);
+    }
+}
+
+/* Add blur effect during spin */
+.reel.spinning .symbol {
+    animation: blurSymbol 0.1s linear infinite;
+}
+
+@keyframes blurSymbol {
+    0%, 100% {
+        filter: blur(0px);
+    }
+    50% {
+        filter: blur(1px);
+    }
+}
+
+/* Winning animation */
+.reel.win .symbol {
+    animation: winPulse 0.5s ease infinite;
+}
+
+@keyframes winPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.1);
+        filter: brightness(1.2);
     }
 }
 
@@ -363,15 +405,6 @@ body {
     display: none;
 }
 
-@keyframes spin {
-    from {
-        transform: translateY(0);
-    }
-    to {
-        transform: translateY(-100%);
-    }
-}
-
 @keyframes winPulse {
     0% {
         transform: scale(1);
@@ -384,19 +417,6 @@ body {
     100% {
         transform: scale(1);
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-    }
-}
-
-.reel.spinning .symbol {
-    animation: symbolSpin 0.2s linear infinite;
-}
-
-@keyframes symbolSpin {
-    0% {
-        transform: translateY(0) scale(1.5);
-    }
-    100% {
-        transform: translateY(-100%) scale(1.5);
     }
 }
 
