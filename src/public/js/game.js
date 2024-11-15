@@ -11,7 +11,7 @@ class PixelSlots {
         };
         this.balance = 1.0;
         this.bet = 0.001;
-        this.jackpot = 10.0;
+        this.jackpot = 1.0;
         this.isSpinning = false;
         this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
@@ -92,17 +92,16 @@ class PixelSlots {
         this.spinButton.disabled = true;
         this.updateBalance(this.balance - this.bet);
 
-        // Contribute to jackpot
-        this.jackpot += this.bet * 0.1;
-        this.updateJackpot(this.jackpot);
-
-        // Generate final symbols
-        const finalSymbols = this.reels.map(() => this.getRandomSymbol());
+        // Keep jackpot constant
+        this.updateJackpot(1.0);
 
         try {
             // Start spinning animation
             this.reels.forEach(reel => reel.classList.add('spinning'));
             window.audioManager?.playSpinSound();
+
+            // Generate final symbols
+            const finalSymbols = this.reels.map(() => this.getRandomSymbol());
 
             // Stop reels one by one
             for (let i = 0; i < this.reels.length; i++) {
@@ -185,10 +184,9 @@ class PixelSlots {
     }
 
     handleJackpotWin() {
-        const winAmount = this.jackpot;
+        const winAmount = 1.0; // Fixed jackpot amount
         this.updateBalance(this.balance + winAmount);
-        this.jackpot = 10.0;
-        this.updateJackpot(this.jackpot);
+        this.updateJackpot(1.0); // Keep jackpot constant
         this.showWinDisplay(winAmount, true);
         window.audioManager?.playJackpotSound();
         this.webApp.HapticFeedback.notificationOccurred('success');
