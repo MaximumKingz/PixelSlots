@@ -1,10 +1,36 @@
 class PixelSlots {
     constructor() {
-        // Regular symbols (more common)
+        // Wait for Telegram WebApp to be ready
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            console.error('Telegram WebApp not found! Please open in Telegram.');
+            alert('Please open this game in Telegram!');
+            return;
+        }
+
+        // Initialize Telegram WebApp
+        this.webApp = window.Telegram.WebApp;
+        this.webApp.ready();
+        this.webApp.expand();
+
+        // Wait for initData to be available
+        if (!this.webApp.initDataUnsafe || !this.webApp.initDataUnsafe.user) {
+            console.error('No Telegram user data!');
+            alert('Please open this game in Telegram!');
+            return;
+        }
+
+        // Log Telegram data
+        const user = this.webApp.initDataUnsafe.user;
+        console.log('=== TELEGRAM USER DATA ===');
+        console.log('ID:', user.id);
+        console.log('Username:', user.username);
+        console.log('First Name:', user.first_name);
+        console.log('Last Name:', user.last_name);
+        console.log('Language:', user.language_code);
+
+        // Game setup
         this.regularSymbols = ['🍒', '🍋', '🍊', '💎', '7️⃣'];
-        // Jackpot symbol (very rare)
         this.jackpotSymbol = '🎰';
-        
         this.symbolValues = {
             '🍒': 2,
             '🍋': 3,
@@ -20,41 +46,25 @@ class PixelSlots {
         this.isSpinning = false;
         this.autoPlayActive = false;
         
-        // Initialize Telegram WebApp
-        this.webApp = window.Telegram?.WebApp;
-        if (!this.webApp) {
-            console.error('Telegram WebApp not found!');
-            alert('Please open this game in Telegram!');
-            return;
-        }
-
-        // Log Telegram data
-        console.log('=== TELEGRAM DATA ===');
-        console.log('User:', this.webApp.initDataUnsafe?.user);
-        console.log('ID:', this.webApp.initDataUnsafe?.user?.id);
-        console.log('Username:', this.webApp.initDataUnsafe?.user?.username);
-
         // API URL
         this.apiUrl = 'https://maximumkingz.de/pixelslots/api.php';
         console.log('API URL:', this.apiUrl);
 
         // Initialize game
-        this.setupTelegram();
         this.initializeGame();
     }
 
     async loadUserData() {
         try {
-            // Check Telegram data
-            if (!this.webApp?.initDataUnsafe?.user?.id) {
-                console.error('No Telegram user data!');
-                alert('Please open this game in Telegram!');
-                return null;
+            // Get Telegram user
+            const user = this.webApp.initDataUnsafe.user;
+            if (!user || !user.id) {
+                throw new Error('No Telegram user data!');
             }
 
             // Get user info
-            const username = this.webApp.initDataUnsafe.user.username || '';
-            const telegramId = this.webApp.initDataUnsafe.user.id.toString();
+            const telegramId = user.id.toString();
+            const username = user.username || '';
             
             console.log('=== LOADING USER DATA ===');
             console.log('Telegram ID:', telegramId);
@@ -72,51 +82,44 @@ class PixelSlots {
                 }
             });
 
-            console.log('API Response Status:', response.status);
-            const responseText = await response.text();
-            console.log('API Response Text:', responseText);
-
-            // Parse response
-            let userData;
-            try {
-                userData = JSON.parse(responseText);
-                console.log('Parsed User Data:', userData);
-            } catch (e) {
-                console.error('Failed to parse API response:', e);
-                alert('Error loading user data. Please try again.');
-                return null;
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status} ${response.statusText}`);
             }
 
-            // Check user data
+            const responseText = await response.text();
+            console.log('API Response:', responseText);
+
+            // Parse response
+            const userData = JSON.parse(responseText);
+            console.log('User Data:', userData);
+
             if (!userData || typeof userData.balance !== 'number') {
-                console.error('Invalid user data:', userData);
-                alert('Invalid user data received. Please try again.');
-                return null;
+                throw new Error('Invalid user data received');
             }
 
             // Update balance
-            await this.updateBalance(userData.balance);
-            console.log('Updated Balance:', this.balance);
+            this.balance = userData.balance;
+            this.updateBalanceDisplay();
+            console.log('Balance updated:', this.balance);
 
             return userData;
         } catch (error) {
             console.error('Error loading user data:', error);
-            alert('Error: ' + error.message);
+            alert(error.message);
             return null;
         }
     }
 
     async saveUserData(winAmount = 0, isWin = false, isJackpot = false) {
         try {
-            // Check Telegram data
-            if (!this.webApp?.initDataUnsafe?.user?.id) {
-                console.error('No Telegram user data!');
-                alert('Please open this game in Telegram!');
-                return null;
+            // Get Telegram user
+            const user = this.webApp.initDataUnsafe.user;
+            if (!user || !user.id) {
+                throw new Error('No Telegram user data!');
             }
 
             // Get user info
-            const telegramId = this.webApp.initDataUnsafe.user.id.toString();
+            const telegramId = user.id.toString();
             
             console.log('=== SAVING USER DATA ===');
             console.log('Telegram ID:', telegramId);
@@ -143,99 +146,73 @@ class PixelSlots {
                 body: JSON.stringify(data)
             });
 
-            console.log('API Response Status:', response.status);
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status} ${response.statusText}`);
+            }
+
             const responseText = await response.text();
-            console.log('API Response Text:', responseText);
+            console.log('API Response:', responseText);
 
             // Parse response
-            let userData;
-            try {
-                userData = JSON.parse(responseText);
-                console.log('Parsed Save Response:', userData);
-            } catch (e) {
-                console.error('Failed to parse API save response:', e);
-                alert('Error saving game data. Please try again.');
-                return null;
-            }
+            const userData = JSON.parse(responseText);
+            console.log('Updated User Data:', userData);
 
             return userData;
         } catch (error) {
             console.error('Error saving user data:', error);
-            alert('Error: ' + error.message);
-            await this.loadUserData();
+            alert(error.message);
             return null;
         }
     }
 
-    setupTelegram() {
-        this.webApp.ready();
-        this.webApp.expand();
+    async initializeGame() {
+        try {
+            // Initialize UI elements
+            this.reels = Array.from(document.querySelectorAll('.reel'));
+            this.spinButton = document.getElementById('spin-button');
+            this.autoPlayButton = document.getElementById('auto-play');
+            this.maxBetButton = document.getElementById('max-bet');
+            this.decreaseBetButton = document.getElementById('decrease-bet');
+            this.increaseBetButton = document.getElementById('increase-bet');
+            this.currentBetDisplay = document.getElementById('current-bet');
+            this.balanceDisplay = document.getElementById('balance');
+            this.jackpotDisplay = document.getElementById('jackpot');
+            this.winOverlay = document.getElementById('win-overlay');
+            this.winAmount = document.getElementById('win-amount');
+            this.collectWinButton = document.getElementById('collect-win');
 
-        // Set theme
-        document.documentElement.style.setProperty(
-            '--tg-theme-bg-color',
-            this.webApp.themeParams.bg_color || '#1c1c1c'
-        );
-        document.documentElement.style.setProperty(
-            '--tg-theme-text-color',
-            this.webApp.themeParams.text_color || '#ffffff'
-        );
-        document.documentElement.style.setProperty(
-            '--tg-theme-button-color',
-            this.webApp.themeParams.button_color || '#3390ec'
-        );
-        document.documentElement.style.setProperty(
-            '--tg-theme-button-text-color',
-            this.webApp.themeParams.button_text_color || '#ffffff'
-        );
+            // Load user data
+            await this.loadUserData();
 
-        // Handle viewport height changes
-        this.webApp.onEvent('viewportChanged', () => {
-            document.documentElement.style.setProperty(
-                '--tg-viewport-height',
-                `${this.webApp.viewportHeight}px`
-            );
-        });
+            // Set initial values
+            this.updateBetDisplay();
+            this.updateWinTable();
+            this.updateJackpot(1000.00);
 
-        // Log Telegram user info
-        console.log('Telegram User:', this.webApp.initDataUnsafe?.user);
+            // Add event listeners
+            this.spinButton.addEventListener('click', () => this.spin());
+            this.autoPlayButton.addEventListener('click', () => this.toggleAutoPlay());
+            this.maxBetButton.addEventListener('click', () => this.setMaxBet());
+            this.decreaseBetButton.addEventListener('click', () => this.adjustBet(-0.10));
+            this.increaseBetButton.addEventListener('click', () => this.adjustBet(0.10));
+            this.collectWinButton.addEventListener('click', () => this.hideWinDisplay());
+
+            // Set initial symbols
+            this.reels.forEach(reel => {
+                reel.querySelector('.symbol').textContent = this.getRandomSymbol();
+            });
+
+            console.log('Game initialized successfully');
+        } catch (error) {
+            console.error('Error initializing game:', error);
+            alert('Error initializing game: ' + error.message);
+        }
     }
 
-    async initializeGame() {
-        // Initialize UI elements
-        this.reels = Array.from(document.querySelectorAll('.reel'));
-        this.spinButton = document.getElementById('spin-button');
-        this.autoPlayButton = document.getElementById('auto-play');
-        this.maxBetButton = document.getElementById('max-bet');
-        this.decreaseBetButton = document.getElementById('decrease-bet');
-        this.increaseBetButton = document.getElementById('increase-bet');
-        this.currentBetDisplay = document.getElementById('current-bet');
-        this.balanceDisplay = document.getElementById('balance');
-        this.jackpotDisplay = document.getElementById('jackpot');
-        this.winOverlay = document.getElementById('win-overlay');
-        this.winAmount = document.getElementById('win-amount');
-        this.collectWinButton = document.getElementById('collect-win');
-
-        // Load user data first
-        await this.loadUserData();
-
-        // Set initial values
-        this.updateBetDisplay();
-        this.updateWinTable();
-        this.updateJackpot(1000.00);
-
-        // Add event listeners
-        this.spinButton.addEventListener('click', () => this.spin());
-        this.autoPlayButton.addEventListener('click', () => this.toggleAutoPlay());
-        this.maxBetButton.addEventListener('click', () => this.setMaxBet());
-        this.decreaseBetButton.addEventListener('click', () => this.adjustBet(-0.10));
-        this.increaseBetButton.addEventListener('click', () => this.adjustBet(0.10));
-        this.collectWinButton.addEventListener('click', () => this.hideWinDisplay());
-
-        // Set initial symbols
-        this.reels.forEach(reel => {
-            reel.querySelector('.symbol').textContent = this.getRandomSymbol();
-        });
+    updateBalanceDisplay() {
+        if (this.balanceDisplay) {
+            this.balanceDisplay.textContent = this.formatMoney(this.balance);
+        }
     }
 
     getRandomSymbol() {

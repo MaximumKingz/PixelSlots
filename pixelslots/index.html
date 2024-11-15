@@ -2,71 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Slots</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="game-container">
-        <div class="stats">
-            <div class="balance">Balance: <span id="balance">$10.00</span></div>
-            <div class="jackpot">Jackpot: <span id="jackpot">$1,000.00</span></div>
+    <div id="game-container">
+        <div id="game-header">
+            <div id="balance-container">
+                <span>Balance:</span>
+                <span id="balance">$0.00</span>
+            </div>
+            <div id="jackpot-container">
+                <span>Jackpot:</span>
+                <span id="jackpot">$0.00</span>
+            </div>
         </div>
 
-        <div class="slot-machine">
+        <div id="slot-machine">
             <div class="reel"><div class="symbol">🎰</div></div>
             <div class="reel"><div class="symbol">🎰</div></div>
             <div class="reel"><div class="symbol">🎰</div></div>
         </div>
 
-        <div class="controls">
-            <div class="bet-controls">
+        <div id="controls">
+            <div id="bet-controls">
                 <button id="decrease-bet">-</button>
-                <div class="current-bet">Bet: <span id="current-bet">$0.10</span></div>
+                <span id="current-bet">$0.10</span>
                 <button id="increase-bet">+</button>
             </div>
-            <button id="spin-button">SPIN</button>
             <button id="max-bet">MAX BET</button>
+            <button id="spin-button">SPIN</button>
             <button id="auto-play">AUTO</button>
         </div>
 
-        <div class="win-table">
+        <div id="win-table">
             <div class="win-row">
-                <div class="symbols">🎰 🎰 🎰</div>
-                <div class="win-amount jackpot">JACKPOT</div>
+                <span>🎰 🎰 🎰</span>
+                <span>JACKPOT</span>
             </div>
             <div class="win-row">
-                <div class="symbols">7️⃣ 7️⃣ 7️⃣</div>
-                <div class="win-amount">x20</div>
+                <span>7️⃣ 7️⃣ 7️⃣</span>
+                <span>x20</span>
             </div>
             <div class="win-row">
-                <div class="symbols">💎 💎 💎</div>
-                <div class="win-amount">x10</div>
+                <span>💎 💎 💎</span>
+                <span>x10</span>
             </div>
             <div class="win-row">
-                <div class="symbols">🍊 🍊 🍊</div>
-                <div class="win-amount">x4</div>
+                <span>🍊 🍊 🍊</span>
+                <span>x4</span>
             </div>
             <div class="win-row">
-                <div class="symbols">🍋 🍋 🍋</div>
-                <div class="win-amount">x3</div>
+                <span>🍋 🍋 🍋</span>
+                <span>x3</span>
             </div>
             <div class="win-row">
-                <div class="symbols">🍒 🍒 🍒</div>
-                <div class="win-amount">x2</div>
+                <span>🍒 🍒 🍒</span>
+                <span>x2</span>
             </div>
         </div>
     </div>
 
-    <div id="win-overlay" class="win-overlay hidden">
-        <div class="win-content">
+    <div id="win-overlay" style="display: none;">
+        <div id="win-content">
             <h2>YOU WIN!</h2>
-            <div id="win-amount" class="win-amount">$0.00</div>
+            <p id="win-amount">$0.00</p>
             <button id="collect-win">COLLECT</button>
         </div>
     </div>
 
+    <script>
+        // Initialize Telegram WebApp
+        window.Telegram.WebApp.ready();
+    </script>
     <script src="game.js"></script>
+    <script>
+        // Wait for Telegram WebApp to be ready
+        window.addEventListener('load', () => {
+            if (!window.Telegram || !window.Telegram.WebApp) {
+                console.error('Please open in Telegram!');
+                alert('Please open this game in Telegram!');
+                return;
+            }
+
+            // Log Telegram data
+            console.log('=== TELEGRAM INIT ===');
+            console.log('WebApp:', window.Telegram.WebApp);
+            console.log('User:', window.Telegram.WebApp.initDataUnsafe?.user);
+
+            // Initialize game
+            window.game = new PixelSlots();
+        });
+    </script>
 </body>
 </html>
