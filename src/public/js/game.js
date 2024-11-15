@@ -16,16 +16,15 @@ class PixelSlots {
         this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
         
-        // Initialize game
         this.initializeGame();
         this.setupTelegram();
     }
 
     setupTelegram() {
-        // Expand to full height
         this.webApp.expand();
+        this.webApp.ready();
 
-        // Set correct theme
+        // Set theme colors
         document.documentElement.style.setProperty('--tg-theme-bg-color', this.webApp.backgroundColor);
         document.documentElement.style.setProperty('--tg-theme-text-color', this.webApp.textColor);
         document.documentElement.style.setProperty('--tg-theme-button-color', this.webApp.buttonColor);
@@ -41,7 +40,7 @@ class PixelSlots {
 
     initializeGame() {
         // Initialize UI elements
-        this.reelStrips = Array.from(document.querySelectorAll('.reel-strip'));
+        this.reels = Array.from(document.querySelectorAll('.reel'));
         this.spinButton = document.getElementById('spin-button');
         this.autoPlayButton = document.getElementById('auto-play');
         this.maxBetButton = document.getElementById('max-bet');
@@ -67,23 +66,10 @@ class PixelSlots {
         this.increaseBetButton.addEventListener('click', () => this.adjustBet(0.001));
         this.collectWinButton.addEventListener('click', () => this.hideWinDisplay());
 
-        // Initialize reel symbols
-        this.reelStrips.forEach(strip => {
-            this.populateReelStrip(strip);
+        // Set initial symbols
+        this.reels.forEach(reel => {
+            reel.querySelector('.symbol').textContent = this.getRandomSymbol();
         });
-    }
-
-    populateReelStrip(strip) {
-        // Clear existing symbols
-        strip.innerHTML = '';
-        
-        // Add symbols
-        for (let i = 0; i < 20; i++) {
-            const symbol = document.createElement('div');
-            symbol.className = 'symbol';
-            symbol.textContent = this.getRandomSymbol();
-            strip.appendChild(symbol);
-        }
     }
 
     getRandomSymbol() {
@@ -106,33 +92,25 @@ class PixelSlots {
         this.updateJackpot(this.jackpot);
 
         // Start spinning animation
-        this.reelStrips.forEach(strip => {
-            strip.style.transition = 'none';
-            strip.style.transform = 'translateY(0)';
-        });
+        this.reels.forEach(reel => reel.classList.add('spinning'));
 
-        // Force reflow
-        this.reelStrips[0].offsetHeight;
-
-        // Add spinning animation
-        this.reelStrips.forEach((strip, index) => {
-            strip.style.transition = `transform ${2 + index * 0.5}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
-            strip.style.transform = `translateY(${-(Math.floor(Math.random() * 5) + 10) * 100}%)`;
-        });
-
-        // Wait for spinning to complete
-        await this.delay(3500);
+        // Play spin sound
+        window.audioManager?.playSpinSound();
 
         // Generate final symbols
-        const finalSymbols = this.reelStrips.map(() => this.getRandomSymbol());
-        
-        // Update reel positions to show final symbols
-        this.reelStrips.forEach((strip, index) => {
-            const symbols = strip.querySelectorAll('.symbol');
-            symbols.forEach(symbol => symbol.textContent = finalSymbols[index]);
-        });
+        const finalSymbols = this.reels.map(() => this.getRandomSymbol());
+
+        // Stop reels one by one
+        for (let i = 0; i < this.reels.length; i++) {
+            await this.delay(400);
+            this.reels[i].classList.remove('spinning');
+            this.reels[i].querySelector('.symbol').textContent = finalSymbols[i];
+            window.audioManager?.playStopSound();
+            this.webApp.HapticFeedback.impactOccurred('rigid');
+        }
 
         // Check for wins
+        await this.delay(300);
         this.checkWin(finalSymbols);
 
         this.isSpinning = false;
