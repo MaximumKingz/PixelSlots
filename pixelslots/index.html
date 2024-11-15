@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Slots</title>
+    <title>🎰 Pixel Slots</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
     
@@ -17,12 +17,12 @@
     <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="loader"></div>
-        <p>Loading...</p>
+        <p>Loading Game...</p>
     </div>
 
     <!-- Error Screen -->
     <div id="error-screen" style="display: none;">
-        <h1>⚠️ Error</h1>
+        <h1>⚠️ ERROR</h1>
         <p id="error-message">Please open in Telegram!</p>
         <button onclick="window.location.reload()" class="big-button">Try Again</button>
     </div>
@@ -31,19 +31,19 @@
     <div id="game-container" style="display: none;">
         <div id="game-header">
             <div id="balance-container">
-                <span>Balance:</span>
+                <span>Balance</span>
                 <span id="balance">$0.00</span>
             </div>
             <div id="jackpot-container">
-                <span>Jackpot:</span>
+                <span>Jackpot</span>
                 <span id="jackpot">$0.00</span>
             </div>
         </div>
 
         <div id="slot-machine">
-            <div class="reel"><div class="symbol">🎰</div></div>
-            <div class="reel"><div class="symbol">🎰</div></div>
-            <div class="reel"><div class="symbol">🎰</div></div>
+            <div class="reel"><div class="symbol">🍒</div></div>
+            <div class="reel"><div class="symbol">🍋</div></div>
+            <div class="reel"><div class="symbol">🍊</div></div>
         </div>
 
         <div id="controls">
@@ -52,59 +52,68 @@
                 <span id="current-bet">$0.10</span>
                 <button id="increase-bet">+</button>
             </div>
-            <button id="max-bet">MAX BET</button>
-            <button id="spin-button" disabled>SPIN!</button>
+            <button id="spin-button">SPIN!</button>
             <button id="auto-play">AUTO</button>
         </div>
 
         <div id="win-table">
             <div class="win-row">
-                <span>🎰 🎰 🎰</span>
+                <div class="symbols">🎰 🎰 🎰</div>
                 <span>JACKPOT</span>
             </div>
             <div class="win-row">
-                <span>7️⃣ 7️⃣ 7️⃣</span>
+                <div class="symbols">7️⃣ 7️⃣ 7️⃣</div>
                 <span>x20</span>
             </div>
             <div class="win-row">
-                <span>💎 💎 💎</span>
+                <div class="symbols">💎 💎 💎</div>
                 <span>x10</span>
             </div>
             <div class="win-row">
-                <span>🍊 🍊 🍊</span>
+                <div class="symbols">🍊 🍊 🍊</div>
                 <span>x4</span>
             </div>
             <div class="win-row">
-                <span>🍋 🍋 🍋</span>
+                <div class="symbols">🍋 🍋 🍋</div>
                 <span>x3</span>
             </div>
             <div class="win-row">
-                <span>🍒 🍒 🍒</span>
+                <div class="symbols">🍒 🍒 🍒</div>
                 <span>x2</span>
             </div>
         </div>
     </div>
 
+    <!-- Win Overlay -->
     <div id="win-overlay">
         <div id="win-content">
             <h2>YOU WIN!</h2>
-            <p id="win-amount">$0.00</p>
-            <button id="collect-win">COLLECT</button>
+            <div id="win-amount">$0.00</div>
         </div>
     </div>
 
-    <!-- Game Scripts -->
+    <!-- Game Logic -->
+    <script src="game.js"></script>
+
+    <!-- Debug Logger -->
+    <script>
+        window.log = (...args) => {
+            console.log('[PIXEL SLOTS]', ...args);
+        };
+
+        function showError(message) {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'flex';
+            document.getElementById('error-message').textContent = message;
+        }
+    </script>
+
+    <!-- Initialize Game -->
     <script>
         // Debug mode
         window.DEBUG = true;
         window.log = (...args) => window.DEBUG && console.log(...args);
-
-        // Show error
-        function showError(message) {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('error-screen').style.display = 'flex';
-            document.getElementById('error-message').textContent = message;
-        }
 
         // Initialize Telegram WebApp
         window.addEventListener('load', async () => {
@@ -210,8 +219,5 @@
             }
         });
     </script>
-    
-    <!-- Game Script -->
-    <script src="game.js"></script>
 </body>
 </html>
