@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Slots - Crypto Slot Machine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/public/styles/main.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <div id="slot-machine">
+            <div class="reels-container">
+                <div class="reel" id="reel1"></div>
+                <div class="reel" id="reel2"></div>
+                <div class="reel" id="reel3"></div>
+            </div>
+            <div class="controls">
+                <div class="bet-controls">
+                    <button id="decrease-bet">-</button>
+                    <span id="current-bet">0.001 BTC</span>
+                    <button id="increase-bet">+</button>
+                </div>
+                <button id="spin-button" class="spin-button">SPIN</button>
+            </div>
+        </div>
+        <div id="balance-container">
+            <span>Balance: </span>
+            <span id="balance">0.000 BTC</span>
+        </div>
+        <div id="jackpot-container">
+            <span>Jackpot: </span>
+            <span id="jackpot">0.000 BTC</span>
+        </div>
+    </div>
+
+    <div id="win-overlay" class="hidden">
+        <div class="win-content">
+            <h2>🎉 BIG WIN! 🎉</h2>
+            <p id="win-amount"></p>
+            <button id="collect-win">COLLECT</button>
+        </div>
+    </div>
+
+    <script src="src/public/js/game.js"></script>
+    <script src="src/public/js/audioManager.js"></script>
+    <script src="src/public/js/particleSystem.js"></script>
+    <script src="src/public/js/cryptoUI.js"></script>
+</body>
+</html>
