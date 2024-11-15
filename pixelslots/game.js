@@ -1,6 +1,23 @@
 // Import Firebase functions
-import { ref, set, get, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.esm.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, set, get, update, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.esm.js';
 import { logEvent } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.esm.js';
+
+// Initialize Firebase
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: "YOUR_DATABASE_URL",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID",
+    measurementId: "YOUR_MEASUREMENT_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const analytics = logEvent;
 
 class PixelSlots {
     constructor() {
@@ -46,11 +63,11 @@ class PixelSlots {
         this.autoPlayActive = false;
         
         // Firebase
-        this.database = window.firebaseDatabase;
-        this.analytics = window.firebaseAnalytics;
+        this.database = database;
+        this.analytics = analytics;
 
         // Track game load
-        logEvent(this.analytics, 'game_loaded', {
+        this.analytics('game_loaded', {
             telegram_id: user.id,
             username: user.username
         });
@@ -76,10 +93,10 @@ class PixelSlots {
             console.log('Username:', username);
             
             // Get Firebase reference
-            const userRef = ref(this.database, 'users/' + telegramId);
+            this.userRef = ref(this.database, 'users/' + telegramId);
             
             // Get user data
-            const snapshot = await get(userRef);
+            const snapshot = await get(this.userRef);
             let userData = snapshot.val();
             
             // Create new user if doesn't exist
@@ -100,11 +117,11 @@ class PixelSlots {
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
-                await set(userRef, userData);
+                await set(this.userRef, userData);
                 console.log('Created new user:', userData);
 
                 // Track new user
-                logEvent(this.analytics, 'new_user_created', {
+                this.analytics('new_user_created', {
                     telegram_id: telegramId,
                     username: username
                 });
@@ -116,9 +133,6 @@ class PixelSlots {
             this.balance = userData.balance;
             this.updateBalanceDisplay();
             console.log('Balance Updated:', this.balance);
-
-            // Save reference
-            this.userRef = userRef;
 
             return userData;
         } catch (error) {
@@ -164,14 +178,14 @@ class PixelSlots {
                     updates.jackpots_won = userData.jackpots_won + 1;
                     
                     // Track jackpot win
-                    logEvent(this.analytics, 'jackpot_won', {
+                    this.analytics('jackpot_won', {
                         telegram_id: telegramId,
                         amount: winAmount
                     });
                 }
 
                 // Track win
-                logEvent(this.analytics, 'game_win', {
+                this.analytics('game_win', {
                     telegram_id: telegramId,
                     amount: winAmount,
                     is_jackpot: isJackpot
@@ -181,7 +195,7 @@ class PixelSlots {
                 updates.total_loss_amount = userData.total_loss_amount + winAmount;
 
                 // Track loss
-                logEvent(this.analytics, 'game_loss', {
+                this.analytics('game_loss', {
                     telegram_id: telegramId,
                     amount: winAmount
                 });
@@ -201,6 +215,79 @@ class PixelSlots {
             console.error('Error saving user:', error);
             alert('Error: ' + error.message);
             return null;
+        }
+    }
+
+    async spin() {
+        if (this.isSpinning) return;
+        if (this.balance < this.bet) {
+            alert('Not enough balance!');
+            return;
+        }
+
+        this.isSpinning = true;
+        this.balance -= this.bet;
+        this.updateBalanceDisplay();
+
+        // Track spin
+        this.analytics('game_spin', {
+            telegram_id: this.webApp.initDataUnsafe?.user?.id,
+            bet_amount: this.bet
+        });
+
+        try {
+            this.reels.forEach(reel => reel.classList.add('spinning'));
+            this.webApp.HapticFeedback.impactOccurred('light');
+
+            // Simulate spinning delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Get random symbols
+            const symbols = this.reels.map(() => this.getRandomSymbol());
+            
+            // Update reels
+            this.reels.forEach((reel, i) => {
+                reel.querySelector('.symbol').textContent = symbols[i];
+                reel.classList.remove('spinning');
+            });
+
+            // Check for win
+            await this.checkWin(symbols);
+        } catch (error) {
+            console.error('Spin error:', error);
+            alert('Error: ' + error.message);
+        } finally {
+            this.isSpinning = false;
+
+            if (this.autoPlayActive && this.balance >= this.bet) {
+                setTimeout(() => this.spin(), 1000);
+            }
+        }
+    }
+
+    async checkWin(symbols) {
+        // All symbols match
+        if (symbols.every(s => s === symbols[0])) {
+            const symbol = symbols[0];
+            const multiplier = this.symbolValues[symbol];
+            const winAmount = this.bet * multiplier;
+
+            // Update balance
+            this.balance += winAmount;
+            this.updateBalanceDisplay();
+
+            // Show win
+            this.winAmount.textContent = this.formatMoney(winAmount);
+            this.winOverlay.style.display = 'flex';
+
+            // Save win
+            await this.saveUserData(winAmount, true, symbol === this.jackpotSymbol);
+
+            // Haptic feedback
+            this.webApp.HapticFeedback.notificationOccurred('success');
+        } else {
+            // Save loss
+            await this.saveUserData(this.bet, false, false);
         }
     }
 
@@ -256,53 +343,54 @@ class PixelSlots {
         this.collectWinButton.addEventListener('click', () => this.hideWinDisplay());
     }
 
+    getRandomSymbol() {
+        const random = Math.random();
+        if (random < 0.0001) { // 0.01% chance for jackpot
+            return this.jackpotSymbol;
+        }
+        return this.regularSymbols[Math.floor(Math.random() * this.regularSymbols.length)];
+    }
+
     updateBalanceDisplay() {
         if (this.balanceDisplay) {
             this.balanceDisplay.textContent = this.formatMoney(this.balance);
         }
     }
 
-    getRandomSymbol() {
-        // 0.01% chance for jackpot symbol (1 in 10,000)
-        if (Math.random() < 0.0001) {
-            return this.jackpotSymbol;
-        }
-        return this.regularSymbols[Math.floor(Math.random() * this.regularSymbols.length)];
-    }
-
     updateBetDisplay() {
-        this.currentBetDisplay.textContent = this.formatMoney(this.bet);
-    }
-
-    updateWinTable() {
-        const winAmounts = document.querySelectorAll('.win-amount:not(.jackpot)');
-        winAmounts.forEach(amount => {
-            const multiplier = parseInt(amount.textContent.replace('x', ''));
-            amount.textContent = `${this.formatMoney(this.bet * multiplier)}`;
-        });
+        if (this.currentBetDisplay) {
+            this.currentBetDisplay.textContent = this.formatMoney(this.bet);
+        }
     }
 
     updateJackpot(amount) {
-        this.jackpot = amount;
-        this.jackpotDisplay.textContent = this.formatMoney(amount);
+        if (this.jackpotDisplay) {
+            this.jackpotDisplay.textContent = this.formatMoney(amount);
+        }
     }
 
-    async updateBalance(amount, winAmount = 0, isWin = false, isJackpot = false) {
-        console.log('Updating balance:', {
-            oldBalance: this.balance,
-            newBalance: amount,
-            winAmount,
-            isWin,
-            isJackpot
+    updateWinTable() {
+        const rows = document.querySelectorAll('.win-row');
+        rows.forEach(row => {
+            const symbol = row.querySelector('.symbols')?.textContent;
+            const multiplier = this.symbolValues[symbol];
+            if (multiplier) {
+                row.querySelector('.win-amount').textContent = `x${multiplier}`;
+            }
         });
-        
-        this.balance = amount;
-        this.balanceDisplay.textContent = this.formatMoney(this.balance);
-        await this.saveUserData(winAmount, isWin, isJackpot);
     }
 
-    formatMoney(amount) {
-        return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    toggleAutoPlay() {
+        this.autoPlayActive = !this.autoPlayActive;
+        this.autoPlayButton.classList.toggle('active', this.autoPlayActive);
+        if (this.autoPlayActive && !this.isSpinning && this.balance >= this.bet) {
+            this.spin();
+        }
+    }
+
+    setMaxBet() {
+        this.bet = Math.min(this.balance, 1.00);
+        this.updateBetDisplay();
     }
 
     adjustBet(amount) {
@@ -310,109 +398,15 @@ class PixelSlots {
         if (newBet !== this.bet) {
             this.bet = newBet;
             this.updateBetDisplay();
-            this.updateWinTable();
-        }
-    }
-
-    setMaxBet() {
-        this.bet = Math.floor(this.balance * 100) / 100;
-        this.updateBetDisplay();
-        this.updateWinTable();
-    }
-
-    toggleAutoPlay() {
-        this.autoPlayActive = !this.autoPlayActive;
-        this.autoPlayButton.classList.toggle('active');
-        if (this.autoPlayActive && !this.isSpinning && this.balance >= this.bet) {
-            this.spin();
-        }
-    }
-
-    showWinDisplay(amount, isJackpot) {
-        this.hideWinDisplay();
-        this.winAmount.textContent = this.formatMoney(amount);
-        this.winOverlay.classList.remove('hidden');
-        if (isJackpot) {
-            this.webApp.HapticFeedback.notificationOccurred('success');
-            this.webApp.HapticFeedback.notificationOccurred('success');
-            this.webApp.HapticFeedback.notificationOccurred('success');
-        } else {
-            this.webApp.HapticFeedback.notificationOccurred('success');
         }
     }
 
     hideWinDisplay() {
-        this.winOverlay.classList.add('hidden');
+        this.winOverlay.style.display = 'none';
     }
 
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async checkWin(symbols) {
-        const isWin = symbols.every(s => s === symbols[0]);
-        
-        if (isWin) {
-            const symbol = symbols[0];
-            const multiplier = this.symbolValues[symbol];
-            const winAmount = this.bet * multiplier;
-            const isJackpot = symbol === this.jackpotSymbol;
-            
-            await this.updateBalance(this.balance + winAmount, winAmount, true, isJackpot);
-            this.showWinDisplay(winAmount, isJackpot);
-        } else {
-            await this.saveUserData(this.bet, false, false);
-        }
-    }
-
-    async spin() {
-        if (this.isSpinning) return;
-        if (this.balance < this.bet) {
-            alert('Not enough balance!');
-            return;
-        }
-
-        this.isSpinning = true;
-        this.balance -= this.bet;
-        this.updateBalanceDisplay();
-
-        // Track spin
-        logEvent(this.analytics, 'game_spin', {
-            telegram_id: this.webApp.initDataUnsafe?.user?.id,
-            bet_amount: this.bet
-        });
-
-        try {
-            this.reels.forEach(reel => reel.classList.add('spinning'));
-            this.webApp.HapticFeedback.impactOccurred('light');
-
-            const finalSymbols = Array(3).fill(null).map(() => this.getRandomSymbol());
-
-            for (let i = 0; i < this.reels.length; i++) {
-                await this.delay(i === 0 ? 800 : 300);
-                
-                const reel = this.reels[i];
-                reel.classList.remove('spinning');
-                const symbol = reel.querySelector('.symbol');
-                if (symbol) {
-                    symbol.textContent = finalSymbols[i];
-                }
-
-                this.webApp.HapticFeedback.impactOccurred('rigid');
-            }
-
-            await this.delay(200);
-            await this.checkWin(finalSymbols);
-        } catch (error) {
-            console.error('Spin error:', error);
-            alert('Error: ' + error.message);
-        } finally {
-            this.isSpinning = false;
-
-            if (this.autoPlayActive && this.balance >= this.bet) {
-                setTimeout(() => this.spin(), 1000);
-            }
-        }
+    formatMoney(amount) {
+        return '$' + amount.toFixed(2);
     }
 }
 

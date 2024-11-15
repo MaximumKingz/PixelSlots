@@ -10,22 +10,43 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-        import { firebaseConfig } from "./firebase-config.js";
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+
+    <!-- Game Scripts -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDt5TovHhe0saMOkY2UuU6GyUdqea9UEuI",
+            authDomain: "pixelslotsfruits.firebaseapp.com",
+            databaseURL: "https://pixelslotsfruits-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pixelslotsfruits",
+            storageBucket: "pixelslotsfruits.firebasestorage.app",
+            messagingSenderId: "499350436174",
+            appId: "1:499350436174:web:59d8b6fbde1eb09325861f",
+            measurementId: "G-5LZF3JY3M7"
+        };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const analytics = getAnalytics(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const analytics = firebase.analytics();
 
-        // Make Firebase available globally
-        window.firebaseApp = app;
-        window.firebaseDatabase = database;
-        window.firebaseAnalytics = analytics;
+        // Initialize Telegram WebApp
+        window.Telegram.WebApp.ready();
+
+        // Wait for everything to load
+        window.addEventListener('load', () => {
+            if (!window.Telegram || !window.Telegram.WebApp) {
+                console.error('Please open in Telegram!');
+                alert('Please open this game in Telegram!');
+                return;
+            }
+
+            // Initialize game
+            window.game = new PixelSlots();
+        });
     </script>
 </head>
 <body>
@@ -94,28 +115,7 @@
         </div>
     </div>
 
-    <script>
-        // Initialize Telegram WebApp
-        window.Telegram.WebApp.ready();
-    </script>
-    <script type="module" src="game.js"></script>
-    <script>
-        // Wait for Telegram WebApp to be ready
-        window.addEventListener('load', () => {
-            if (!window.Telegram || !window.Telegram.WebApp) {
-                console.error('Please open in Telegram!');
-                alert('Please open this game in Telegram!');
-                return;
-            }
-
-            // Log Telegram data
-            console.log('=== TELEGRAM INIT ===');
-            console.log('WebApp:', window.Telegram.WebApp);
-            console.log('User:', window.Telegram.WebApp.initDataUnsafe?.user);
-
-            // Initialize game
-            window.game = new PixelSlots();
-        });
-    </script>
+    <!-- Game Script -->
+    <script src="game.js"></script>
 </body>
 </html>
