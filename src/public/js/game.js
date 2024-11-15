@@ -106,7 +106,7 @@ class PixelSlots {
 
             // Stop reels one by one
             for (let i = 0; i < this.reels.length; i++) {
-                await this.delay(i === 0 ? 1500 : 500);
+                await this.delay(i === 0 ? 800 : 300);
                 
                 const reel = this.reels[i];
                 reel.classList.remove('spinning');
@@ -120,7 +120,7 @@ class PixelSlots {
             }
 
             // Check for wins
-            await this.delay(300);
+            await this.delay(200);
             this.checkWin(finalSymbols);
         } catch (error) {
             console.error('Spin error:', error);
@@ -202,14 +202,19 @@ class PixelSlots {
     }
 
     showWinDisplay(amount, isJackpot) {
+        // Hide any existing overlay
+        this.hideWinDisplay();
+
         // Set content
         this.winAmount.textContent = `${amount.toFixed(8)} BTC`;
         this.winOverlay.querySelector('h2').textContent = isJackpot ? '🎉 JACKPOT! 🎉' : '🎉 BIG WIN! 🎉';
 
         // Show overlay
-        this.winOverlay.classList.remove('hidden');
-        this.webApp.BackButton.show();
-        this.webApp.HapticFeedback.notificationOccurred('success');
+        requestAnimationFrame(() => {
+            this.winOverlay.classList.remove('hidden');
+            this.webApp.BackButton.show();
+            this.webApp.HapticFeedback.notificationOccurred('success');
+        });
 
         // Auto-hide after 5 seconds if autoplay is active
         if (this.autoPlayActive) {
