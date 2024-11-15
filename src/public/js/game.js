@@ -24,7 +24,7 @@ class PixelSlots {
         // Use production server URL when deployed
         this.apiBaseUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000/api'
-            : 'https://pixel-slots.herokuapp.com/api';
+            : 'https://pixel-slots-server.herokuapp.com/api';
 
         this.initializeGame();
         this.setupTelegram();
