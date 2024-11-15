@@ -22,9 +22,7 @@ class PixelSlots {
         this.webApp = window.Telegram.WebApp;
         
         // Use production server URL when deployed
-        this.apiBaseUrl = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000/api'
-            : 'https://pixel-slots-server.herokuapp.com/api';
+        this.apiBaseUrl = 'https://pixel-slots-server.herokuapp.com/api';
 
         this.setupTelegram();
         this.initializeGame();
@@ -38,10 +36,15 @@ class PixelSlots {
             }
 
             const username = this.webApp.initDataUnsafe.user.username || '';
-            console.log('Loading data for user:', this.webApp.initDataUnsafe.user.id);
+            const telegramId = this.webApp.initDataUnsafe.user.id;
+            
+            console.log('Loading data for user:', {
+                telegramId,
+                username
+            });
             
             const response = await fetch(
-                `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}?username=${username}`,
+                `${this.apiBaseUrl}/user/${telegramId}?username=${username}`,
                 {
                     method: 'GET',
                     headers: {
@@ -58,7 +61,8 @@ class PixelSlots {
             console.log('Loaded user data:', userData);
             
             if (userData && typeof userData.balance === 'number') {
-                this.updateBalance(userData.balance);
+                await this.updateBalance(userData.balance);
+                console.log('Updated balance to:', userData.balance);
             } else {
                 console.error('Invalid user data received:', userData);
                 throw new Error('Invalid user data');
@@ -78,7 +82,9 @@ class PixelSlots {
                 return;
             }
 
-            console.log('Saving data for user:', this.webApp.initDataUnsafe.user.id, {
+            const telegramId = this.webApp.initDataUnsafe.user.id;
+            console.log('Saving data for user:', {
+                telegramId,
                 balance: this.balance,
                 isWin,
                 winAmount,
@@ -86,7 +92,7 @@ class PixelSlots {
             });
 
             const response = await fetch(
-                `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}/update`,
+                `${this.apiBaseUrl}/user/${telegramId}/update`,
                 {
                     method: 'POST',
                     headers: {
@@ -134,9 +140,9 @@ class PixelSlots {
         await this.loadUserData();
 
         // Set initial values
-        this.updateJackpot(1000.00);
         this.updateBetDisplay();
         this.updateWinTable();
+        this.updateJackpot(1000.00);
 
         // Add event listeners
         this.spinButton.addEventListener('click', () => this.spin());
@@ -153,6 +159,14 @@ class PixelSlots {
     }
 
     async updateBalance(amount, winAmount = 0, isWin = false, isJackpot = false) {
+        console.log('Updating balance:', {
+            oldBalance: this.balance,
+            newBalance: amount,
+            winAmount,
+            isWin,
+            isJackpot
+        });
+        
         this.balance = amount;
         this.balanceDisplay.textContent = this.formatMoney(this.balance);
         await this.saveUserData(winAmount, isWin, isJackpot);
