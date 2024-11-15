@@ -1,23 +1,11 @@
-:root {
-    --tg-theme-bg-color: #1c1c1c;
-    --tg-theme-text-color: #ffffff;
-    --tg-theme-button-color: #3390ec;
-    --tg-theme-button-text-color: #ffffff;
-    --tg-viewport-height: 100vh;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     margin: 0;
     padding: 20px;
     font-family: Arial, sans-serif;
     background: #1a1a1a;
     color: white;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #game-container {
@@ -26,26 +14,14 @@ body {
     text-align: center;
 }
 
-.game-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    height: 100%;
-}
-
 #game-header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
     font-size: 1.2em;
-}
-
-.stats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 20px;
+    padding: 10px;
+    background: #2a2a2a;
+    border-radius: 10px;
 }
 
 #slot-machine {
@@ -53,13 +29,9 @@ body {
     justify-content: center;
     gap: 10px;
     margin: 20px 0;
-}
-
-.slot-machine {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 20px 0;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 10px;
 }
 
 .reel {
@@ -72,6 +44,8 @@ body {
     align-items: center;
     font-size: 2em;
     overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
 
 .symbol {
@@ -80,24 +54,12 @@ body {
 
 #controls {
     margin: 20px 0;
-}
-
-.controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 20px 0;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 10px;
 }
 
 #bet-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.bet-controls {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -114,28 +76,33 @@ button {
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 button:not(:disabled):hover {
     background: #5a5a5a;
     transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 button:not(:disabled):active {
     background: #3a3a3a;
     transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background: #2a2a2a;
+    box-shadow: none;
 }
 
 #spin-button {
     padding: 15px 30px;
     font-size: 1.2em;
     background: #4CAF50;
+    margin: 10px;
 }
 
 #spin-button:not(:disabled):hover {
@@ -155,20 +122,19 @@ button:disabled {
     border: 1px solid #333;
     border-radius: 10px;
     padding: 10px;
-}
-
-.win-table {
-    margin-top: 20px;
-    border: 1px solid #333;
-    border-radius: 10px;
-    padding: 10px;
+    background: #2a2a2a;
 }
 
 .win-row {
     display: flex;
     justify-content: space-between;
-    padding: 5px 0;
+    padding: 8px;
     border-bottom: 1px solid #333;
+    transition: background 0.3s ease;
+}
+
+.win-row:hover {
+    background: #3a3a3a;
 }
 
 .win-row:last-child {
@@ -195,35 +161,16 @@ button:disabled {
     justify-content: center;
     align-items: center;
     z-index: 1000;
-}
-
-.win-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    backdrop-filter: blur(5px);
 }
 
 #win-content {
     background: #2a2a2a;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 30px;
+    border-radius: 15px;
     text-align: center;
     animation: popup 0.3s ease-out;
-}
-
-.win-content {
-    background: #2a2a2a;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    animation: popup 0.3s ease-out;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
 
 @keyframes popup {
@@ -233,24 +180,16 @@ button:disabled {
 
 #win-content h2 {
     color: #4CAF50;
-    margin: 0 0 10px 0;
-}
-
-.win-content h2 {
-    color: #4CAF50;
-    margin: 0 0 10px 0;
+    margin: 0 0 20px 0;
+    font-size: 2em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 #win-amount {
-    font-size: 2em;
-    margin: 10px 0;
+    font-size: 3em;
+    margin: 20px 0;
     color: #FFD700;
-}
-
-.win-amount {
-    font-size: 2em;
-    margin: 10px 0;
-    color: #FFD700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .active {
@@ -277,5 +216,14 @@ button:disabled {
 
     #game-header {
         font-size: 1em;
+    }
+
+    #win-content {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    #win-amount {
+        font-size: 2em;
     }
 }

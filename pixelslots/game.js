@@ -1,16 +1,19 @@
 class PixelSlots {
     constructor() {
-        console.log('Starting game initialization...');
+        window.log('Starting game initialization...');
 
         // Initialize Telegram WebApp
         this.webApp = window.Telegram.WebApp;
+        if (!this.webApp) {
+            throw new Error('Please open in Telegram!');
+        }
         
         // Log Telegram initialization
-        console.log('=== TELEGRAM INITIALIZATION ===');
-        console.log('WebApp Version:', this.webApp.version);
-        console.log('Platform:', this.webApp.platform);
-        console.log('Init Data:', this.webApp.initData);
-        console.log('Init Data Unsafe:', this.webApp.initDataUnsafe);
+        window.log('=== TELEGRAM INITIALIZATION ===');
+        window.log('WebApp Version:', this.webApp.version);
+        window.log('Platform:', this.webApp.platform);
+        window.log('Init Data:', this.webApp.initData);
+        window.log('Init Data Unsafe:', this.webApp.initDataUnsafe);
         
         // Verify Telegram user
         const user = this.webApp.initDataUnsafe?.user;
@@ -19,11 +22,11 @@ class PixelSlots {
         }
 
         // Log user data
-        console.log('=== TELEGRAM USER ===');
-        console.log('User ID:', user.id);
-        console.log('Username:', user.username);
-        console.log('First Name:', user.first_name);
-        console.log('Last Name:', user.last_name);
+        window.log('=== TELEGRAM USER ===');
+        window.log('User ID:', user.id);
+        window.log('Username:', user.username);
+        window.log('First Name:', user.first_name);
+        window.log('Last Name:', user.last_name);
 
         // Game configuration
         this.regularSymbols = ['🍒', '🍋', '🍊', '💎', '7️⃣'];
@@ -49,13 +52,15 @@ class PixelSlots {
 
         // Load user data
         this.loadUserData().then(() => {
-            console.log('Game ready to play!');
+            window.log('Game ready to play!');
             // Enable spin button
             this.spinButton.disabled = false;
+            this.spinButton.textContent = 'SPIN!';
         }).catch(error => {
-            console.error('Error loading user data:', error);
+            window.log('Error loading user data:', error);
             // Disable spin button
             this.spinButton.disabled = true;
+            this.spinButton.textContent = 'ERROR';
             alert(error.message);
         });
     }
@@ -72,9 +77,9 @@ class PixelSlots {
             const telegramId = user.id.toString();
             const username = user.username || user.first_name || '';
             
-            console.log('=== LOADING USER DATA ===');
-            console.log('Telegram ID:', telegramId);
-            console.log('Username:', username);
+            window.log('=== LOADING USER DATA ===');
+            window.log('Telegram ID:', telegramId);
+            window.log('Username:', username);
             
             // Get user data from Supabase
             let { data: userData, error } = await window.supabase
@@ -82,6 +87,8 @@ class PixelSlots {
                 .select('*')
                 .eq('telegram_id', telegramId)
                 .single();
+
+            window.log('Supabase response:', { userData, error });
 
             // Create new user if doesn't exist
             if (error || !userData) {
@@ -102,7 +109,7 @@ class PixelSlots {
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('Creating new user with data:', newUser);
+                window.log('Creating new user with data:', newUser);
                 const { data, error: insertError } = await window.supabase
                     .from('users')
                     .insert([newUser])
@@ -111,9 +118,9 @@ class PixelSlots {
 
                 if (insertError) throw insertError;
                 userData = data;
-                console.log('Created new user');
+                window.log('Created new user:', userData);
             } else {
-                console.log('Found existing user:', userData);
+                window.log('Found existing user:', userData);
             }
 
             // Update balance and display
@@ -128,10 +135,10 @@ class PixelSlots {
                 reel.querySelector('.symbol').textContent = this.getRandomSymbol();
             });
 
-            console.log('Balance Updated:', this.balance);
+            window.log('Balance Updated:', this.balance);
             return userData;
         } catch (error) {
-            console.error('Error loading user:', error);
+            window.log('Error loading user:', error);
             throw error; // Re-throw to handle in constructor
         }
     }
@@ -147,9 +154,9 @@ class PixelSlots {
             // Get user info
             const telegramId = user.id.toString();
             
-            console.log('=== SAVING USER DATA ===');
-            console.log('Telegram ID:', telegramId);
-            console.log('Current Balance:', this.balance);
+            window.log('=== SAVING USER DATA ===');
+            window.log('Telegram ID:', telegramId);
+            window.log('Current Balance:', this.balance);
             
             // Get current data
             let { data: userData, error } = await window.supabase
@@ -183,7 +190,7 @@ class PixelSlots {
             }
 
             // Save to Supabase
-            console.log('Saving updates:', updates);
+            window.log('Saving updates:', updates);
             const { data: updatedData, error: updateError } = await window.supabase
                 .from('users')
                 .update(updates)
@@ -192,11 +199,11 @@ class PixelSlots {
                 .single();
 
             if (updateError) throw updateError;
-            console.log('Updated user data:', updatedData);
+            window.log('Updated user data:', updatedData);
 
             return updatedData;
         } catch (error) {
-            console.error('Error saving user:', error);
+            window.log('Error saving user:', error);
             throw error;
         }
     }
@@ -210,6 +217,7 @@ class PixelSlots {
 
         // Disable spin button
         this.spinButton.disabled = true;
+        this.spinButton.textContent = 'SPINNING...';
 
         this.isSpinning = true;
         this.balance -= this.bet;
@@ -234,12 +242,13 @@ class PixelSlots {
             // Check for win
             await this.checkWin(symbols);
         } catch (error) {
-            console.error('Spin error:', error);
+            window.log('Spin error:', error);
             alert('Error: ' + error.message);
         } finally {
             this.isSpinning = false;
             // Enable spin button if we have enough balance
             this.spinButton.disabled = this.balance < this.bet;
+            this.spinButton.textContent = 'SPIN!';
 
             if (this.autoPlayActive && this.balance >= this.bet) {
                 setTimeout(() => this.spin(), 1000);
@@ -274,7 +283,7 @@ class PixelSlots {
     }
 
     initializeUI() {
-        console.log('Initializing UI...');
+        window.log('Initializing UI...');
 
         // Get UI elements
         this.reels = Array.from(document.querySelectorAll('.reel'));
@@ -292,6 +301,7 @@ class PixelSlots {
 
         // Disable spin button initially
         this.spinButton.disabled = true;
+        this.spinButton.textContent = 'LOADING...';
 
         // Add event listeners
         this.spinButton.addEventListener('click', () => this.spin());
@@ -305,7 +315,7 @@ class PixelSlots {
         this.updateBalanceDisplay();
         this.updateBetDisplay();
 
-        console.log('UI initialized');
+        window.log('UI initialized');
     }
 
     getRandomSymbol() {
@@ -318,7 +328,7 @@ class PixelSlots {
 
     updateBalanceDisplay() {
         if (this.balanceDisplay) {
-            console.log('Updating balance display:', this.balance);
+            window.log('Updating balance display:', this.balance);
             this.balanceDisplay.textContent = this.formatMoney(this.balance);
             // Update spin button state
             this.spinButton.disabled = this.balance < this.bet;
@@ -381,14 +391,3 @@ class PixelSlots {
         return '$' + amount.toFixed(2);
     }
 }
-
-// Initialize game when DOM is loaded
-window.addEventListener('DOMContentLoaded', () => {
-    console.log('Page loaded, initializing game...');
-    try {
-        window.game = new PixelSlots();
-    } catch (error) {
-        console.error('Game initialization error:', error);
-        alert(error.message);
-    }
-});

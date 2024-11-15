@@ -9,43 +9,51 @@
     <!-- Telegram WebApp -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
-
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Game Scripts -->
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDt5TovHhe0saMOkY2UuU6GyUdqea9UEuI",
-            authDomain: "pixelslotsfruits.firebaseapp.com",
-            databaseURL: "https://pixelslotsfruits-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pixelslotsfruits",
-            storageBucket: "pixelslotsfruits.firebasestorage.app",
-            messagingSenderId: "499350436174",
-            appId: "1:499350436174:web:59d8b6fbde1eb09325861f",
-            measurementId: "G-5LZF3JY3M7"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const analytics = firebase.analytics();
+        // Debug mode
+        window.DEBUG = true;
+        window.log = (...args) => window.DEBUG && console.log(...args);
 
         // Initialize Telegram WebApp
-        window.Telegram.WebApp.ready();
-
-        // Wait for everything to load
         window.addEventListener('load', () => {
-            if (!window.Telegram || !window.Telegram.WebApp) {
-                console.error('Please open in Telegram!');
-                alert('Please open this game in Telegram!');
-                return;
-            }
+            try {
+                const tg = window.Telegram.WebApp;
+                window.log('=== INITIALIZATION ===');
+                window.log('Telegram:', tg);
+                window.log('User:', tg.initDataUnsafe?.user);
+                window.log('Platform:', tg.platform);
+                window.log('Version:', tg.version);
 
-            // Initialize game
-            window.game = new PixelSlots();
+                // Set theme
+                tg.setHeaderColor('#1a1a1a');
+                tg.setBackgroundColor('#1a1a1a');
+                tg.enableClosingConfirmation();
+                tg.expand();
+
+                // Initialize Supabase
+                const supabaseUrl = 'https://vcspybmymfmxhvqeehkp.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc3B5Ym15bWZteGh2cWVlaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2OTU3NzEsImV4cCI6MjA0NzI3MTc3MX0.wyzWwNd5F0HDjKCRPnSZ7vXajh6XVa9t0TjU5PG6P7I';
+                
+                window.log('Initializing Supabase...');
+                const { createClient } = supabase;
+                window.supabase = createClient(supabaseUrl, supabaseKey);
+                window.log('Supabase initialized');
+
+                // Initialize game
+                window.game = new PixelSlots();
+                window.log('Game initialized');
+
+                // Mark as ready
+                tg.ready();
+                window.log('Telegram WebApp ready');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('Error: ' + error.message);
+            }
         });
     </script>
 </head>
@@ -75,7 +83,7 @@
                 <button id="increase-bet">+</button>
             </div>
             <button id="max-bet">MAX BET</button>
-            <button id="spin-button">SPIN</button>
+            <button id="spin-button" disabled>LOADING...</button>
             <button id="auto-play">AUTO</button>
         </div>
 
@@ -107,7 +115,7 @@
         </div>
     </div>
 
-    <div id="win-overlay" style="display: none;">
+    <div id="win-overlay">
         <div id="win-content">
             <h2>YOU WIN!</h2>
             <p id="win-amount">$0.00</p>
