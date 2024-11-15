@@ -13,11 +13,11 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    height: var(--tg-viewport-height);
-    overflow: hidden;
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #1a1a1a;
+    color: white;
 }
 
 .game-container {
@@ -48,29 +48,24 @@ body {
 .reel {
     width: 80px;
     height: 80px;
-    background: #2c2c2c;
+    background: #333;
     border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 40px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    font-size: 2em;
+    overflow: hidden;
 }
 
-.reel.spinning .symbol {
-    animation: spin 0.2s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: translateY(-50px); opacity: 0; }
-    50% { opacity: 1; }
-    100% { transform: translateY(50px); opacity: 0; }
+.symbol {
+    transition: transform 0.5s ease-out;
 }
 
 .controls {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin: 20px 0;
 }
 
 .bet-controls {
@@ -82,14 +77,22 @@ body {
 }
 
 button {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none;
     padding: 10px 20px;
-    border-radius: 8px;
     font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    background: #4a4a4a;
+    color: white;
     cursor: pointer;
-    transition: opacity 0.3s;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #5a5a5a;
+}
+
+button:active {
+    background: #3a3a3a;
 }
 
 button:disabled {
@@ -104,20 +107,30 @@ button:disabled {
 }
 
 .win-table {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    background: #2c2c2c;
-    padding: 10px;
+    margin-top: 20px;
+    border: 1px solid #333;
     border-radius: 10px;
+    padding: 10px;
 }
 
 .win-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 5px 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid #333;
+}
+
+.win-row:last-child {
+    border-bottom: none;
+}
+
+.spinning {
+    animation: spin 0.5s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: translateY(0); }
+    to { transform: translateY(-100%); }
 }
 
 .win-overlay {
@@ -126,39 +139,60 @@ button:disabled {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.8);
-    display: flex;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
 
-.win-overlay.hidden {
-    display: none;
+.win-content {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    animation: popup 0.3s ease-out;
 }
 
-.win-content {
-    background: #2c2c2c;
-    padding: 30px;
-    border-radius: 20px;
-    text-align: center;
+@keyframes popup {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
 .win-content h2 {
-    color: gold;
+    color: #4CAF50;
+    margin: 0 0 10px 0;
+}
+
+.win-amount {
     font-size: 2em;
-    margin-bottom: 20px;
-    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+    margin: 10px 0;
+    color: #FFD700;
 }
 
-.win-content .win-amount {
-    font-size: 3em;
-    margin-bottom: 20px;
-    color: #3390ec;
-    text-shadow: 0 0 10px rgba(51,144,236,0.5);
+.active {
+    background: #4CAF50 !important;
+    color: white !important;
 }
 
-.jackpot {
-    color: gold;
-    text-shadow: 0 0 5px rgba(255,215,0,0.5);
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .reel {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5em;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+
+    .stats {
+        font-size: 1em;
+    }
 }
