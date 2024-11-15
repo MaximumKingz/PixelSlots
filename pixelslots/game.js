@@ -13,9 +13,7 @@ class PixelSlots {
         // Verify Telegram user
         const user = this.webApp.initDataUnsafe?.user;
         if (!user || !user.id) {
-            console.error('No Telegram user found:', user);
-            alert('Please open this game in Telegram!');
-            return;
+            throw new Error('No Telegram user found!');
         }
 
         // Log user data
@@ -56,6 +54,7 @@ class PixelSlots {
             console.error('Error loading user data:', error);
             // Disable spin button
             this.spinButton.disabled = true;
+            alert('Error: ' + error.message);
         });
     }
 
@@ -131,8 +130,7 @@ class PixelSlots {
             return userData;
         } catch (error) {
             console.error('Error loading user:', error);
-            alert('Error: ' + error.message);
-            return null;
+            throw error; // Re-throw to handle in constructor
         }
     }
 
@@ -197,8 +195,7 @@ class PixelSlots {
             return updatedData;
         } catch (error) {
             console.error('Error saving user:', error);
-            alert('Error: ' + error.message);
-            return null;
+            throw error;
         }
     }
 
@@ -239,8 +236,8 @@ class PixelSlots {
             alert('Error: ' + error.message);
         } finally {
             this.isSpinning = false;
-            // Enable spin button
-            this.spinButton.disabled = false;
+            // Enable spin button if we have enough balance
+            this.spinButton.disabled = this.balance < this.bet;
 
             if (this.autoPlayActive && this.balance >= this.bet) {
                 setTimeout(() => this.spin(), 1000);
@@ -321,6 +318,8 @@ class PixelSlots {
         if (this.balanceDisplay) {
             console.log('Updating balance display:', this.balance);
             this.balanceDisplay.textContent = this.formatMoney(this.balance);
+            // Update spin button state
+            this.spinButton.disabled = this.balance < this.bet;
         }
     }
 
