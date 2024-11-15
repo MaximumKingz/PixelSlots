@@ -1,0 +1,338 @@
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    font-family: 'Press Start 2P', monospace;
+}
+
+/* Base Theme Colors */
+:root {
+    --gold-main: #ffd700;
+    --gold-light: #ffed4a;
+    --gold-dark: #b8860b;
+    --bg-dark: #1a1a1a;
+    --bg-darker: #000000;
+    --bg-lighter: #2a2a2a;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--gold-main);
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Game Container */
+#game-container {
+    width: 100%;
+    max-width: 640px;
+    background: var(--bg-lighter);
+    padding: 16px;
+    border: 4px solid var(--gold-main);
+    box-shadow: 
+        0 0 0 4px var(--bg-lighter),
+        0 0 0 8px var(--gold-main),
+        0 0 20px var(--gold-main),
+        inset 0 0 10px var(--gold-main);
+    margin: 20px auto;
+    image-rendering: pixelated;
+}
+
+/* Loading & Error */
+#loading-screen, #error-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-darker);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    gap: 20px;
+    padding: 20px;
+}
+
+.loader {
+    width: 32px;
+    height: 32px;
+    border: 4px solid var(--gold-main);
+    animation: spin 1s steps(8) infinite;
+    box-shadow: 0 0 10px var(--gold-main);
+}
+
+/* Game Header */
+#game-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 4px solid var(--gold-main);
+    font-size: 12px;
+    line-height: 1.5;
+    text-transform: uppercase;
+    background: var(--bg-darker);
+    box-shadow: 
+        inset 0 0 10px var(--gold-main),
+        0 0 10px var(--gold-main);
+}
+
+#balance-container, #jackpot-container {
+    padding: 8px;
+    border: 2px solid var(--gold-main);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--bg-lighter);
+    text-shadow: 0 0 5px var(--gold-main);
+}
+
+#jackpot-container {
+    animation: jackpot-pulse 1s steps(2) infinite;
+}
+
+/* Slot Machine */
+#slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 16px 0;
+    padding: 16px;
+    border: 4px solid var(--gold-main);
+    background: var(--bg-darker);
+    box-shadow: 
+        inset 0 0 20px var(--gold-main),
+        0 0 10px var(--gold-main);
+}
+
+.reel {
+    width: 64px;
+    height: 64px;
+    border: 2px solid var(--gold-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-lighter);
+    overflow: hidden;
+    box-shadow: 
+        inset 0 0 10px var(--gold-main),
+        0 0 5px var(--gold-main);
+}
+
+.reel .symbol {
+    font-size: 40px;
+    line-height: 64px;
+    transform-origin: center;
+    filter: drop-shadow(0 0 3px var(--gold-main));
+}
+
+/* Controls */
+#controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+}
+
+#bet-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    grid-column: span 2;
+    font-size: 12px;
+}
+
+button {
+    padding: 8px 16px;
+    font-size: 12px;
+    background: var(--bg-lighter);
+    border: 2px solid var(--gold-main);
+    color: var(--gold-main);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.1s step-end;
+    box-shadow: 
+        2px 2px 0 var(--gold-main),
+        0 0 5px var(--gold-main);
+    text-shadow: 0 0 5px var(--gold-main);
+}
+
+button:not(:disabled):hover {
+    background: var(--gold-main);
+    color: var(--bg-darker);
+    transform: translate(1px, 1px);
+    box-shadow: 
+        1px 1px 0 var(--gold-main),
+        0 0 10px var(--gold-main);
+}
+
+button:not(:disabled):active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 15px var(--gold-main);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Win Table */
+#win-table {
+    margin: 16px 0;
+    padding: 16px;
+    border: 4px solid var(--gold-main);
+    font-size: 12px;
+    background: var(--bg-darker);
+    box-shadow: 
+        inset 0 0 10px var(--gold-main),
+        0 0 10px var(--gold-main);
+}
+
+.win-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 2px solid var(--gold-main);
+    text-shadow: 0 0 5px var(--gold-main);
+}
+
+.win-row:last-child {
+    border-bottom: none;
+}
+
+/* Win Overlay */
+#win-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+#win-content {
+    padding: 32px;
+    background: var(--bg-lighter);
+    border: 4px solid var(--gold-main);
+    text-align: center;
+    animation: win-pulse 0.2s steps(3) infinite;
+    box-shadow: 0 0 30px var(--gold-main);
+}
+
+#win-amount {
+    font-size: 24px;
+    margin: 16px 0;
+    color: var(--gold-main);
+    text-shadow: 
+        0 0 5px var(--gold-main),
+        2px 2px var(--bg-darker);
+    animation: win-text 0.5s steps(2) infinite;
+}
+
+/* Animations */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes jackpot-pulse {
+    0%, 100% { 
+        border-color: var(--gold-main);
+        color: var(--gold-main);
+        text-shadow: 0 0 5px var(--gold-main);
+        box-shadow: 0 0 10px var(--gold-main);
+    }
+    50% { 
+        border-color: var(--gold-light);
+        color: var(--gold-light);
+        text-shadow: 0 0 10px var(--gold-light);
+        box-shadow: 0 0 20px var(--gold-light);
+    }
+}
+
+@keyframes win-pulse {
+    0% { 
+        transform: scale(1);
+        box-shadow: 0 0 30px var(--gold-main);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 50px var(--gold-light);
+    }
+    100% { 
+        transform: scale(1);
+        box-shadow: 0 0 30px var(--gold-main);
+    }
+}
+
+@keyframes win-text {
+    0%, 100% { 
+        color: var(--gold-main);
+        text-shadow: 
+            0 0 5px var(--gold-main),
+            2px 2px var(--bg-darker);
+    }
+    50% { 
+        color: var(--gold-light);
+        text-shadow: 
+            0 0 10px var(--gold-light),
+            2px 2px var(--bg-darker);
+    }
+}
+
+.reel.spinning .symbol {
+    animation: spin-reel 0.2s steps(4) infinite;
+}
+
+@keyframes spin-reel {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-64px); }
+}
+
+/* Button States */
+.active {
+    background: var(--gold-main) !important;
+    color: var(--bg-darker) !important;
+    box-shadow: 0 0 15px var(--gold-main) !important;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    #game-container {
+        padding: 8px;
+    }
+
+    .reel {
+        width: 48px;
+        height: 48px;
+    }
+
+    .reel .symbol {
+        font-size: 32px;
+        line-height: 48px;
+    }
+
+    button {
+        padding: 6px 12px;
+        font-size: 10px;
+    }
+
+    #bet-controls {
+        font-size: 10px;
+    }
+}
+
+/* Font */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
