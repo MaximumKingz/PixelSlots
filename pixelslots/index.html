@@ -111,10 +111,6 @@
 
     <!-- Initialize Game -->
     <script>
-        // Debug mode
-        window.DEBUG = true;
-        window.log = (...args) => window.DEBUG && console.log(...args);
-
         // Initialize Telegram WebApp
         window.addEventListener('load', async () => {
             try {
@@ -128,8 +124,8 @@
 
                 // Set theme
                 tg.expand();
-                tg.setHeaderColor('#1a1a1a');
-                tg.setBackgroundColor('#1a1a1a');
+                tg.setHeaderColor('#000000');
+                tg.setBackgroundColor('#000000');
                 tg.disableClosingConfirmation();
 
                 window.log('=== INITIALIZATION ===');
@@ -137,7 +133,6 @@
                 window.log('User:', tg.initDataUnsafe?.user);
                 window.log('Platform:', tg.platform);
                 window.log('Version:', tg.version);
-                window.log('Init Data:', tg.initData);
 
                 // Check if user exists
                 const user = tg.initDataUnsafe?.user;
@@ -150,10 +145,13 @@
                 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc3B5Ym15bWZteGh2cWVlaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2OTU3NzEsImV4cCI6MjA0NzI3MTc3MX0.wyzWwNd5F0HDjKCRPnSZ7vXajh6XVa9t0TjU5PG6P7I';
                 
                 window.log('Initializing Supabase...');
-                const { createClient } = supabase;
-                window.supabase = createClient(supabaseUrl, supabaseKey);
+                window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
                 try {
+                    // Test connection
+                    const { error: connectionError } = await window.supabase.from('users').select('count').limit(1);
+                    if (connectionError) throw connectionError;
+
                     // Try to get user data
                     let { data: userData, error } = await window.supabase
                         .from('users')
