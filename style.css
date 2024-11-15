@@ -1,4 +1,4 @@
-/* Reset & Base */
+/* Pixel Art Base */
 * {
     margin: 0;
     padding: 0;
@@ -6,201 +6,154 @@
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     font-family: 'Press Start 2P', monospace;
-}
-
-/* Base Theme Colors */
-:root {
-    --gold-main: #ffd700;
-    --gold-light: #ffed4a;
-    --gold-dark: #b8860b;
-    --bg-dark: #1a1a1a;
-    --bg-darker: #000000;
-    --bg-lighter: #2a2a2a;
+    user-select: none;
 }
 
 body {
-    background: var(--bg-dark);
-    color: var(--gold-main);
+    background: #000;
+    color: #fff;
     padding: 20px;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: center;
 }
 
 /* Game Container */
 #game-container {
     width: 100%;
-    max-width: 640px;
-    background: var(--bg-lighter);
-    padding: 16px;
-    border: 4px solid var(--gold-main);
-    box-shadow: 
-        0 0 0 4px var(--bg-lighter),
-        0 0 0 8px var(--gold-main),
-        0 0 20px var(--gold-main),
-        inset 0 0 10px var(--gold-main);
-    margin: 20px auto;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #111;
+    border: 4px solid #fff;
     image-rendering: pixelated;
 }
 
-/* Loading & Error */
+/* Loading Screen */
 #loading-screen, #error-screen {
     position: fixed;
-    inset: 0;
-    background: var(--bg-darker);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 2000;
     gap: 20px;
-    padding: 20px;
 }
 
 .loader {
     width: 32px;
     height: 32px;
-    border: 4px solid var(--gold-main);
+    border: 4px solid #fff;
     animation: spin 1s steps(8) infinite;
-    box-shadow: 0 0 10px var(--gold-main);
 }
 
 /* Game Header */
 #game-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 16px;
-    padding: 16px;
-    border: 4px solid var(--gold-main);
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 4px solid #fff;
     font-size: 12px;
-    line-height: 1.5;
-    text-transform: uppercase;
-    background: var(--bg-darker);
-    box-shadow: 
-        inset 0 0 10px var(--gold-main),
-        0 0 10px var(--gold-main);
+    background: #000;
 }
 
 #balance-container, #jackpot-container {
-    padding: 8px;
-    border: 2px solid var(--gold-main);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: var(--bg-lighter);
-    text-shadow: 0 0 5px var(--gold-main);
+    padding: 10px;
+    border: 2px solid #fff;
+    background: #111;
+    text-transform: uppercase;
 }
 
 #jackpot-container {
-    animation: jackpot-pulse 1s steps(2) infinite;
+    animation: blink 1s steps(2) infinite;
 }
 
 /* Slot Machine */
 #slot-machine {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin: 16px 0;
-    padding: 16px;
-    border: 4px solid var(--gold-main);
-    background: var(--bg-darker);
-    box-shadow: 
-        inset 0 0 20px var(--gold-main),
-        0 0 10px var(--gold-main);
+    gap: 10px;
+    margin: 20px 0;
+    padding: 20px;
+    border: 4px solid #fff;
+    background: #000;
 }
 
 .reel {
-    width: 64px;
-    height: 64px;
-    border: 2px solid var(--gold-main);
+    width: 80px;
+    height: 80px;
+    border: 2px solid #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-lighter);
+    background: #111;
     overflow: hidden;
-    box-shadow: 
-        inset 0 0 10px var(--gold-main),
-        0 0 5px var(--gold-main);
 }
 
 .reel .symbol {
-    font-size: 40px;
-    line-height: 64px;
-    transform-origin: center;
-    filter: drop-shadow(0 0 3px var(--gold-main));
+    font-size: 48px;
+    line-height: 80px;
 }
 
 /* Controls */
 #controls {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin: 16px 0;
+    margin: 20px 0;
 }
 
 #bet-controls {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    grid-column: span 2;
+    gap: 10px;
+    margin-bottom: 10px;
     font-size: 12px;
 }
 
 button {
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-size: 12px;
-    background: var(--bg-lighter);
-    border: 2px solid var(--gold-main);
-    color: var(--gold-main);
+    background: #111;
+    border: 2px solid #fff;
+    color: #fff;
     cursor: pointer;
     text-transform: uppercase;
     transition: all 0.1s step-end;
-    box-shadow: 
-        2px 2px 0 var(--gold-main),
-        0 0 5px var(--gold-main);
-    text-shadow: 0 0 5px var(--gold-main);
+    font-family: 'Press Start 2P', monospace;
 }
 
 button:not(:disabled):hover {
-    background: var(--gold-main);
-    color: var(--bg-darker);
-    transform: translate(1px, 1px);
-    box-shadow: 
-        1px 1px 0 var(--gold-main),
-        0 0 10px var(--gold-main);
+    background: #fff;
+    color: #000;
 }
 
 button:not(:disabled):active {
     transform: translate(2px, 2px);
-    box-shadow: 0 0 15px var(--gold-main);
 }
 
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    box-shadow: none;
 }
 
 /* Win Table */
 #win-table {
-    margin: 16px 0;
-    padding: 16px;
-    border: 4px solid var(--gold-main);
+    margin: 20px 0;
+    padding: 20px;
+    border: 4px solid #fff;
     font-size: 12px;
-    background: var(--bg-darker);
-    box-shadow: 
-        inset 0 0 10px var(--gold-main),
-        0 0 10px var(--gold-main);
+    background: #000;
 }
 
 .win-row {
     display: flex;
     justify-content: space-between;
-    padding: 8px;
-    border-bottom: 2px solid var(--gold-main);
-    text-shadow: 0 0 5px var(--gold-main);
+    padding: 10px;
+    border-bottom: 2px solid #fff;
 }
 
 .win-row:last-child {
@@ -211,30 +164,27 @@ button:disabled {
 #win-overlay {
     display: none;
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
     z-index: 1000;
     align-items: center;
     justify-content: center;
 }
 
 #win-content {
-    padding: 32px;
-    background: var(--bg-lighter);
-    border: 4px solid var(--gold-main);
+    padding: 40px;
+    background: #111;
+    border: 4px solid #fff;
     text-align: center;
-    animation: win-pulse 0.2s steps(3) infinite;
-    box-shadow: 0 0 30px var(--gold-main);
+    animation: blink 0.2s step-end infinite;
 }
 
 #win-amount {
     font-size: 24px;
-    margin: 16px 0;
-    color: var(--gold-main);
-    text-shadow: 
-        0 0 5px var(--gold-main),
-        2px 2px var(--bg-darker);
-    animation: win-text 0.5s steps(2) infinite;
+    margin: 20px 0;
 }
 
 /* Animations */
@@ -243,49 +193,9 @@ button:disabled {
     100% { transform: rotate(360deg); }
 }
 
-@keyframes jackpot-pulse {
-    0%, 100% { 
-        border-color: var(--gold-main);
-        color: var(--gold-main);
-        text-shadow: 0 0 5px var(--gold-main);
-        box-shadow: 0 0 10px var(--gold-main);
-    }
-    50% { 
-        border-color: var(--gold-light);
-        color: var(--gold-light);
-        text-shadow: 0 0 10px var(--gold-light);
-        box-shadow: 0 0 20px var(--gold-light);
-    }
-}
-
-@keyframes win-pulse {
-    0% { 
-        transform: scale(1);
-        box-shadow: 0 0 30px var(--gold-main);
-    }
-    50% { 
-        transform: scale(1.05);
-        box-shadow: 0 0 50px var(--gold-light);
-    }
-    100% { 
-        transform: scale(1);
-        box-shadow: 0 0 30px var(--gold-main);
-    }
-}
-
-@keyframes win-text {
-    0%, 100% { 
-        color: var(--gold-main);
-        text-shadow: 
-            0 0 5px var(--gold-main),
-            2px 2px var(--bg-darker);
-    }
-    50% { 
-        color: var(--gold-light);
-        text-shadow: 
-            0 0 10px var(--gold-light),
-            2px 2px var(--bg-darker);
-    }
+@keyframes blink {
+    0%, 100% { border-color: #fff; }
+    50% { border-color: #000; }
 }
 
 .reel.spinning .symbol {
@@ -294,14 +204,13 @@ button:disabled {
 
 @keyframes spin-reel {
     0% { transform: translateY(0); }
-    100% { transform: translateY(-64px); }
+    100% { transform: translateY(-80px); }
 }
 
 /* Button States */
 .active {
-    background: var(--gold-main) !important;
-    color: var(--bg-darker) !important;
-    box-shadow: 0 0 15px var(--gold-main) !important;
+    background: #fff !important;
+    color: #000 !important;
 }
 
 /* Mobile */
@@ -311,21 +220,21 @@ button:disabled {
     }
 
     #game-container {
-        padding: 8px;
+        padding: 10px;
     }
 
     .reel {
-        width: 48px;
-        height: 48px;
+        width: 60px;
+        height: 60px;
     }
 
     .reel .symbol {
-        font-size: 32px;
-        line-height: 48px;
+        font-size: 36px;
+        line-height: 60px;
     }
 
     button {
-        padding: 6px 12px;
+        padding: 8px 16px;
         font-size: 10px;
     }
 
