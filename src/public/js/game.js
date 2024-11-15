@@ -68,6 +68,7 @@ class PixelSlots {
         this.updateBalance(this.balance);
         this.updateJackpot(1000.00);
         this.updateBetDisplay();
+        this.updateWinTable();
 
         // Add event listeners
         this.spinButton.addEventListener('click', () => this.spin());
@@ -243,6 +244,7 @@ class PixelSlots {
         if (maxPossibleBet !== this.bet) {
             this.bet = maxPossibleBet;
             this.updateBetDisplay();
+            this.updateWinTable();
             this.webApp.HapticFeedback.notificationOccurred('success');
         }
     }
@@ -252,22 +254,24 @@ class PixelSlots {
         if (newBet !== this.bet) {
             this.bet = newBet;
             this.updateBetDisplay();
+            this.updateWinTable();
             this.webApp.HapticFeedback.notificationOccurred('success');
         }
     }
 
     updateBetDisplay() {
         this.currentBetDisplay.textContent = this.formatMoney(this.bet);
-        this.updateWinTable(); // Update win amounts when bet changes
     }
 
     updateWinTable() {
-        // Update each win amount based on current bet
-        const multipliers = [20, 10, 4, 3, 2]; // Multipliers for each symbol (excluding jackpot)
+        const winAmounts = document.querySelectorAll('.win-amount:not(.jackpot)');
+        const multipliers = [20, 10, 4, 3, 2];
         
-        this.winAmounts.forEach((element, index) => {
-            const winAmount = this.bet * multipliers[index];
-            element.textContent = this.formatMoney(winAmount);
+        winAmounts.forEach((element, index) => {
+            if (index < multipliers.length) {
+                const winAmount = this.bet * multipliers[index];
+                element.textContent = this.formatMoney(winAmount);
+            }
         });
     }
 
