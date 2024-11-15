@@ -59,31 +59,36 @@ A pixel-art themed slot machine game built as a Telegram Mini-App with cryptocur
 
 ## Setup
 
-1. Install dependencies:
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (v4.4 or higher)
+- npm or yarn
+
+### Server Setup
+1. Navigate to the server directory:
+```bash
+cd server
+```
+
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Configure environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your credentials:
-# - Database connection
-# - Telegram Bot Token
-# - Cryptomus API keys
-# - JWT secret
+3. Create a `.env` file with your MongoDB connection string:
+```env
+MONGODB_URI=mongodb://localhost:27017/pixelslots
+PORT=3000
 ```
 
-3. Set up the database:
-```bash
-# Run MySQL migrations
-npm run migrate
-```
-
-4. Start development server:
+4. Start the server:
 ```bash
 npm run dev
 ```
+
+### Game Setup
+1. Host the game files on a static file server or GitHub Pages
+2. Update the `apiBaseUrl` in `src/public/js/game.js` to point to your server
 
 ## Telegram Bot Setup
 

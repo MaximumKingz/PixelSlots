@@ -11,7 +11,7 @@ class PixelSlots {
             '🍊': 4,
             '💎': 10,
             '7️⃣': 20,
-            '🎰': 10000 // Jackpot multiplier
+            '🎰': 10000
         };
         
         this.balance = 10.00;
@@ -21,39 +21,54 @@ class PixelSlots {
         this.autoPlayActive = false;
         this.webApp = window.Telegram.WebApp;
         
+        // Use production server URL when deployed
+        this.apiBaseUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : 'https://pixel-slots.herokuapp.com/api';
+
         this.initializeGame();
         this.setupTelegram();
+    }
+
+    async loadUserData() {
+        try {
+            const username = this.webApp.initDataUnsafe.user.username;
+            const response = await fetch(
+                `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}?username=${username}`
+            );
+            const userData = await response.json();
+            this.updateBalance(userData.balance);
+            return userData;
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            return null;
+        }
+    }
+
+    async saveUserData(winAmount = 0, isWin = false, isJackpot = false) {
+        try {
+            await fetch(`${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    balance: this.balance,
+                    isWin,
+                    winAmount,
+                    isJackpot
+                })
+            });
+        } catch (error) {
+            console.error('Error saving user data:', error);
+        }
     }
 
     formatMoney(amount) {
         return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    setupTelegram() {
-        this.webApp.expand();
-        this.webApp.ready();
-
-        // Set theme colors
-        document.documentElement.style.setProperty('--tg-theme-bg-color', this.webApp.backgroundColor);
-        document.documentElement.style.setProperty('--tg-theme-text-color', this.webApp.textColor);
-        document.documentElement.style.setProperty('--tg-theme-button-color', this.webApp.buttonColor);
-        document.documentElement.style.setProperty('--tg-theme-button-text-color', this.webApp.buttonTextColor);
-        document.documentElement.style.setProperty('--tg-viewport-height', `${this.webApp.viewportHeight}px`);
-
-        // Handle back button
-        this.webApp.BackButton.onClick(() => {
-            if (document.querySelector('.win-overlay:not(.hidden)')) {
-                this.hideWinDisplay();
-            }
-        });
-
-        // Handle viewport height changes
-        this.webApp.onEvent('viewportChanged', () => {
-            document.documentElement.style.setProperty('--tg-viewport-height', `${this.webApp.viewportHeight}px`);
-        });
-    }
-
-    initializeGame() {
+    async initializeGame() {
         // Initialize UI elements
         this.reels = Array.from(document.querySelectorAll('.reel'));
         this.spinButton = document.getElementById('spin-button');
@@ -69,8 +84,10 @@ class PixelSlots {
         this.collectWinButton = document.getElementById('collect-win');
         this.winAmounts = document.querySelectorAll('.win-amount:not(.jackpot)');
 
+        // Load user data
+        await this.loadUserData();
+
         // Set initial values
-        this.updateBalance(this.balance);
         this.updateJackpot(1000.00);
         this.updateBetDisplay();
         this.updateWinTable();
@@ -134,7 +151,7 @@ class PixelSlots {
 
             // Check for wins
             await this.delay(200);
-            this.checkWin(finalSymbols);
+            await this.checkWin(finalSymbols);
         } catch (error) {
             console.error('Spin error:', error);
         } finally {
@@ -148,69 +165,33 @@ class PixelSlots {
         }
     }
 
-    checkWin(symbols) {
-        // Remove previous win highlights
-        this.reels.forEach(reel => {
-            reel.classList.remove('win');
-            reel.querySelector('.symbol').style.transform = 'scale(1)';
-        });
-
-        // Check for jackpot
-        if (symbols.every(symbol => symbol === '🎰')) {
-            this.highlightWinningSymbols(symbols);
-            this.handleJackpotWin();
-            return;
-        }
-
-        // Check for regular win
-        if (symbols.every(symbol => symbol === symbols[0])) {
-            this.highlightWinningSymbols(symbols);
-            const multiplier = this.symbolValues[symbols[0]];
+    async checkWin(symbols) {
+        // Check if all symbols are the same
+        const isWin = symbols.every(s => s === symbols[0]);
+        
+        if (isWin) {
+            const symbol = symbols[0];
+            const multiplier = this.symbolValues[symbol];
             const winAmount = this.bet * multiplier;
-            this.handleWin(winAmount);
-            return;
+            const isJackpot = symbol === this.jackpotSymbol;
+
+            // Update balance and save with win data
+            await this.updateBalance(this.balance + winAmount, winAmount, true, isJackpot);
+
+            // Show win notification
+            this.showWinDisplay(winAmount, isJackpot);
+            window.audioManager?.playWinSound(winAmount);
+            this.webApp.HapticFeedback.notificationOccurred('success');
+        } else {
+            // Save spin data without win
+            await this.saveUserData(this.bet, false, false);
         }
-
-        // Check for partial wins
-        const matches = symbols.filter(symbol => symbol === symbols[0]).length;
-        if (matches === 2) {
-            this.highlightWinningSymbols(symbols);
-            const multiplier = this.symbolValues[symbols[0]] / 2;
-            const winAmount = this.bet * multiplier;
-            this.handleWin(winAmount);
-            return;
-        }
-
-        // Play lose sound
-        window.audioManager?.playLoseSound();
     }
 
-    highlightWinningSymbols(symbols) {
-        symbols.forEach((symbol, index) => {
-            if (symbol === symbols[0]) {
-                const reel = this.reels[index];
-                reel.classList.add('win');
-                const symbolEl = reel.querySelector('.symbol');
-                symbolEl.style.transform = 'scale(1.2)';
-                symbolEl.style.transition = 'transform 0.3s ease';
-            }
-        });
-    }
-
-    handleJackpotWin() {
-        const winAmount = 1000.00; // Fixed jackpot amount
-        this.updateBalance(this.balance + winAmount);
-        this.updateJackpot(1000.00); // Keep jackpot constant
-        this.showWinDisplay(winAmount, true);
-        window.audioManager?.playJackpotSound();
-        this.webApp.HapticFeedback.notificationOccurred('success');
-    }
-
-    handleWin(amount) {
-        this.updateBalance(this.balance + amount);
-        this.showWinDisplay(amount, false);
-        window.audioManager?.playWinSound(amount);
-        this.webApp.HapticFeedback.notificationOccurred('success');
+    async updateBalance(amount, winAmount = 0, isWin = false, isJackpot = false) {
+        this.balance = amount;
+        this.balanceDisplay.textContent = this.formatMoney(this.balance);
+        await this.saveUserData(winAmount, isWin, isJackpot);
     }
 
     showWinDisplay(amount, isJackpot) {
@@ -283,11 +264,6 @@ class PixelSlots {
         });
     }
 
-    updateBalance(amount) {
-        this.balance = amount;
-        this.balanceDisplay.textContent = this.formatMoney(this.balance);
-    }
-
     updateJackpot(amount) {
         this.jackpot = amount;
         this.jackpotDisplay.textContent = this.formatMoney(this.jackpot);
@@ -295,6 +271,30 @@ class PixelSlots {
 
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    setupTelegram() {
+        this.webApp.expand();
+        this.webApp.ready();
+
+        // Set theme colors
+        document.documentElement.style.setProperty('--tg-theme-bg-color', this.webApp.backgroundColor);
+        document.documentElement.style.setProperty('--tg-theme-text-color', this.webApp.textColor);
+        document.documentElement.style.setProperty('--tg-theme-button-color', this.webApp.buttonColor);
+        document.documentElement.style.setProperty('--tg-theme-button-text-color', this.webApp.buttonTextColor);
+        document.documentElement.style.setProperty('--tg-viewport-height', `${this.webApp.viewportHeight}px`);
+
+        // Handle back button
+        this.webApp.BackButton.onClick(() => {
+            if (document.querySelector('.win-overlay:not(.hidden)')) {
+                this.hideWinDisplay();
+            }
+        });
+
+        // Handle viewport height changes
+        this.webApp.onEvent('viewportChanged', () => {
+            document.documentElement.style.setProperty('--tg-viewport-height', `${this.webApp.viewportHeight}px`);
+        });
     }
 }
 
