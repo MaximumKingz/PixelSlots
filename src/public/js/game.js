@@ -62,10 +62,11 @@ class PixelSlots {
         this.winOverlay = document.getElementById('win-overlay');
         this.winAmount = document.getElementById('win-amount');
         this.collectWinButton = document.getElementById('collect-win');
+        this.winAmounts = document.querySelectorAll('.win-amount:not(.jackpot)');
 
         // Set initial values
         this.updateBalance(this.balance);
-        this.updateJackpot(this.jackpot);
+        this.updateJackpot(1000.00);
         this.updateBetDisplay();
 
         // Add event listeners
@@ -257,6 +258,17 @@ class PixelSlots {
 
     updateBetDisplay() {
         this.currentBetDisplay.textContent = this.formatMoney(this.bet);
+        this.updateWinTable(); // Update win amounts when bet changes
+    }
+
+    updateWinTable() {
+        // Update each win amount based on current bet
+        const multipliers = [20, 10, 4, 3, 2]; // Multipliers for each symbol (excluding jackpot)
+        
+        this.winAmounts.forEach((element, index) => {
+            const winAmount = this.bet * multipliers[index];
+            element.textContent = this.formatMoney(winAmount);
+        });
     }
 
     updateBalance(amount) {
