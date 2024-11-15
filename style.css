@@ -1,24 +1,35 @@
-/* Pixel Art Base */
+/* Retro Pixel Base */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    image-rendering: pixelated !important;
+    image-rendering: crisp-edges !important;
     font-family: 'Press Start 2P', monospace;
     user-select: none;
 }
 
+:root {
+    --pixel-black: #000000;
+    --pixel-white: #ffffff;
+    --pixel-red: #ff0000;
+    --pixel-green: #00ff00;
+    --pixel-blue: #0000ff;
+    --pixel-yellow: #ffff00;
+    --pixel-dark: #111111;
+}
+
 body {
-    background: #000;
-    color: #fff;
+    background: var(--pixel-black);
+    color: var(--pixel-white);
     padding: 20px;
     min-height: 100vh;
-    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    line-height: 1.5;
 }
 
 /* Game Container */
@@ -27,19 +38,19 @@ body {
     max-width: 500px;
     margin: 0 auto;
     padding: 20px;
-    background: #111;
-    border: 4px solid #fff;
+    background: var(--pixel-dark);
+    border: 4px solid var(--pixel-white);
+    box-shadow: 
+        0 0 0 4px var(--pixel-black),
+        0 0 0 8px var(--pixel-white);
     image-rendering: pixelated;
 }
 
 /* Loading Screen */
 #loading-screen, #error-screen {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #000;
+    inset: 0;
+    background: var(--pixel-black);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -51,18 +62,20 @@ body {
 .loader {
     width: 32px;
     height: 32px;
-    border: 4px solid #fff;
+    border: 4px solid var(--pixel-white);
     animation: spin 1s steps(8) infinite;
 }
 
 #loading-screen p {
     font-size: 12px;
     text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 #error-screen h1 {
     font-size: 24px;
     margin-bottom: 10px;
+    color: var(--pixel-red);
 }
 
 #error-screen p {
@@ -73,16 +86,16 @@ body {
 .big-button {
     padding: 15px 30px;
     font-size: 16px;
-    background: #111;
-    border: 4px solid #fff;
-    color: #fff;
+    background: var(--pixel-dark);
+    border: 4px solid var(--pixel-white);
+    color: var(--pixel-white);
     cursor: pointer;
     text-transform: uppercase;
 }
 
 .big-button:hover {
-    background: #fff;
-    color: #000;
+    background: var(--pixel-white);
+    color: var(--pixel-black);
 }
 
 /* Game Header */
@@ -90,24 +103,28 @@ body {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
-    padding: 10px;
-    border: 4px solid #fff;
+    padding: 15px;
+    border: 4px solid var(--pixel-white);
     font-size: 12px;
-    background: #000;
+    background: var(--pixel-black);
+    box-shadow: inset 0 0 0 2px var(--pixel-black);
 }
 
 #balance-container, #jackpot-container {
     padding: 10px;
-    border: 2px solid #fff;
-    background: #111;
+    border: 2px solid var(--pixel-white);
+    background: var(--pixel-dark);
     text-transform: uppercase;
     display: flex;
     flex-direction: column;
     gap: 5px;
+    min-width: 120px;
 }
 
 #jackpot-container {
     animation: blink 1s steps(2) infinite;
+    color: var(--pixel-yellow);
+    border-color: var(--pixel-yellow);
 }
 
 /* Slot Machine */
@@ -117,24 +134,45 @@ body {
     gap: 10px;
     margin: 20px 0;
     padding: 20px;
-    border: 4px solid #fff;
-    background: #000;
+    border: 4px solid var(--pixel-white);
+    background: var(--pixel-black);
+    box-shadow: inset 0 0 0 2px var(--pixel-black);
 }
 
 .reel {
     width: 80px;
     height: 80px;
-    border: 2px solid #fff;
+    border: 2px solid var(--pixel-white);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #111;
+    background: var(--pixel-dark);
     overflow: hidden;
+    position: relative;
+}
+
+.reel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.2) 0%,
+        rgba(255,255,255,0) 20%,
+        rgba(255,255,255,0) 80%,
+        rgba(255,255,255,0.2) 100%
+    );
+    pointer-events: none;
 }
 
 .reel .symbol {
     font-size: 48px;
     line-height: 80px;
+    transform-origin: center;
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.5));
 }
 
 /* Controls */
@@ -147,16 +185,16 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-size: 12px;
 }
 
 button {
     padding: 10px 20px;
     font-size: 12px;
-    background: #111;
-    border: 2px solid #fff;
-    color: #fff;
+    background: var(--pixel-dark);
+    border: 2px solid var(--pixel-white);
+    color: var(--pixel-white);
     cursor: pointer;
     text-transform: uppercase;
     transition: all 0.1s step-end;
@@ -164,8 +202,8 @@ button {
 }
 
 button:not(:disabled):hover {
-    background: #fff;
-    color: #000;
+    background: var(--pixel-white);
+    color: var(--pixel-black);
 }
 
 button:not(:disabled):active {
@@ -181,30 +219,34 @@ button:disabled {
 #win-table {
     margin: 20px 0;
     padding: 20px;
-    border: 4px solid #fff;
+    border: 4px solid var(--pixel-white);
     font-size: 12px;
-    background: #000;
+    background: var(--pixel-black);
+    box-shadow: inset 0 0 0 2px var(--pixel-black);
 }
 
 .win-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 10px;
-    border-bottom: 2px solid #fff;
+    border-bottom: 2px solid var(--pixel-white);
 }
 
 .win-row:last-child {
     border-bottom: none;
 }
 
+.win-row .symbols {
+    display: flex;
+    gap: 10px;
+}
+
 /* Win Overlay */
 #win-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: rgba(0, 0, 0, 0.8);
     z-index: 1000;
     align-items: center;
@@ -213,15 +255,17 @@ button:disabled {
 
 #win-content {
     padding: 40px;
-    background: #111;
-    border: 4px solid #fff;
+    background: var(--pixel-dark);
+    border: 4px solid var(--pixel-yellow);
     text-align: center;
-    animation: blink 0.2s step-end infinite;
+    animation: win-blink 0.2s step-end infinite;
+    color: var(--pixel-yellow);
 }
 
 #win-amount {
     font-size: 24px;
     margin: 20px 0;
+    text-shadow: 2px 2px var(--pixel-black);
 }
 
 /* Animations */
@@ -231,8 +275,27 @@ button:disabled {
 }
 
 @keyframes blink {
-    0%, 100% { border-color: #fff; }
-    50% { border-color: #000; }
+    0%, 100% { 
+        border-color: var(--pixel-yellow);
+        color: var(--pixel-yellow);
+    }
+    50% { 
+        border-color: var(--pixel-white);
+        color: var(--pixel-white);
+    }
+}
+
+@keyframes win-blink {
+    0%, 100% { 
+        border-color: var(--pixel-yellow);
+        color: var(--pixel-yellow);
+        transform: scale(1);
+    }
+    50% { 
+        border-color: var(--pixel-white);
+        color: var(--pixel-white);
+        transform: scale(1.05);
+    }
 }
 
 .reel.spinning .symbol {
@@ -246,8 +309,8 @@ button:disabled {
 
 /* Button States */
 .active {
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--pixel-white) !important;
+    color: var(--pixel-black) !important;
 }
 
 /* Mobile */
