@@ -202,19 +202,17 @@ class PixelSlots {
     }
 
     showWinDisplay(amount, isJackpot) {
-        // Hide any existing overlay
+        // Hide any existing overlay first
         this.hideWinDisplay();
-
+        
         // Set content
         this.winAmount.textContent = `${amount.toFixed(8)} BTC`;
         this.winOverlay.querySelector('h2').textContent = isJackpot ? '🎉 JACKPOT! 🎉' : '🎉 BIG WIN! 🎉';
-
+        
         // Show overlay
-        requestAnimationFrame(() => {
-            this.winOverlay.classList.remove('hidden');
-            this.webApp.BackButton.show();
-            this.webApp.HapticFeedback.notificationOccurred('success');
-        });
+        this.winOverlay.classList.remove('hidden');
+        this.webApp.BackButton.show();
+        this.webApp.HapticFeedback.notificationOccurred('success');
 
         // Auto-hide after 5 seconds if autoplay is active
         if (this.autoPlayActive) {
@@ -223,8 +221,10 @@ class PixelSlots {
     }
 
     hideWinDisplay() {
-        this.winOverlay.classList.add('hidden');
-        this.webApp.BackButton.hide();
+        if (!this.winOverlay.classList.contains('hidden')) {
+            this.winOverlay.classList.add('hidden');
+            this.webApp.BackButton.hide();
+        }
     }
 
     toggleAutoPlay() {
