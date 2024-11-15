@@ -19,13 +19,6 @@
         <p>Loading...</p>
     </div>
 
-    <!-- Registration Screen -->
-    <div id="registration-screen" style="display: none;">
-        <h1>Welcome to Pixel Slots!</h1>
-        <p>Get $10 FREE to start playing!</p>
-        <button id="register-button" class="big-button">START PLAYING</button>
-    </div>
-
     <!-- Game Screen -->
     <div id="game-container" style="display: none;">
         <div id="game-header">
@@ -135,92 +128,19 @@
                     throw new Error('Please open in Telegram!');
                 }
 
-                // Check if user is registered
-                const { data: userData, error } = await window.supabase
-                    .from('users')
-                    .select('*')
-                    .eq('telegram_id', user.id.toString())
-                    .single();
+                // Initialize game
+                window.game = new PixelSlots();
 
                 // Hide loading screen
                 document.getElementById('loading-screen').style.display = 'none';
-
-                if (error || !userData) {
-                    // Show registration screen
-                    document.getElementById('registration-screen').style.display = 'flex';
-                } else {
-                    // Show game
-                    document.getElementById('game-container').style.display = 'block';
-                    window.game = new PixelSlots();
-                }
+                // Show game
+                document.getElementById('game-container').style.display = 'block';
 
                 // Mark as ready
                 tg.ready();
             } catch (error) {
                 window.log('Initialization error:', error);
                 alert('Error: ' + error.message);
-            }
-        });
-
-        // Registration handler
-        document.getElementById('register-button').addEventListener('click', async () => {
-            try {
-                window.log('Starting registration...');
-                const tg = window.Telegram.WebApp;
-                const user = tg.initDataUnsafe?.user;
-                
-                if (!user || !user.id) {
-                    throw new Error('Please open in Telegram!');
-                }
-
-                window.log('User:', user);
-                const registerButton = document.getElementById('register-button');
-                registerButton.textContent = 'REGISTERING...';
-                registerButton.disabled = true;
-
-                // Create user in Supabase
-                const { data, error } = await window.supabase
-                    .from('users')
-                    .insert([{
-                        telegram_id: user.id.toString(),
-                        username: user.username || user.first_name || '',
-                        balance: 10.00,
-                        total_spins: 0,
-                        total_wins: 0,
-                        total_losses: 0,
-                        biggest_win: 0,
-                        total_win_amount: 0,
-                        total_loss_amount: 0,
-                        jackpots_won: 0,
-                        last_spin: new Date().toISOString(),
-                        last_win: new Date().toISOString(),
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    }])
-                    .select()
-                    .single();
-
-                if (error) {
-                    throw error;
-                }
-
-                window.log('Registration successful!');
-
-                // Hide registration screen
-                document.getElementById('registration-screen').style.display = 'none';
-                
-                // Show game
-                document.getElementById('game-container').style.display = 'block';
-                
-                // Initialize game
-                window.game = new PixelSlots();
-            } catch (error) {
-                window.log('Registration error:', error);
-                alert('Error: ' + error.message);
-                
-                const registerButton = document.getElementById('register-button');
-                registerButton.textContent = 'TRY AGAIN';
-                registerButton.disabled = false;
             }
         });
     </script>

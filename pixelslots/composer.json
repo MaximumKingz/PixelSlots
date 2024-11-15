@@ -1,0 +1,5 @@
+{
+    "require": {
+        "supabase/supabase-php": "^2.0"
+    }
+}
