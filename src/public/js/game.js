@@ -14,7 +14,7 @@ class PixelSlots {
             '🎰': 10000
         };
         
-        this.balance = 10.00;
+        this.balance = 0; // Start with 0, will be set after loading from server
         this.bet = 0.10;
         this.jackpot = 1000.00;
         this.isSpinning = false;
@@ -26,46 +26,79 @@ class PixelSlots {
             ? 'http://localhost:3000/api'
             : 'https://pixel-slots-server.herokuapp.com/api';
 
-        this.initializeGame();
         this.setupTelegram();
+        this.initializeGame();
     }
 
     async loadUserData() {
         try {
-            const username = this.webApp.initDataUnsafe.user.username;
+            if (!this.webApp.initDataUnsafe?.user?.id) {
+                console.error('No Telegram user ID found');
+                return null;
+            }
+
+            const username = this.webApp.initDataUnsafe.user.username || '';
             const response = await fetch(
-                `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}?username=${username}`
+                `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}?username=${username}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
             );
+
+            if (!response.ok) {
+                throw new Error('Failed to load user data');
+            }
+
             const userData = await response.json();
-            this.updateBalance(userData.balance);
+            console.log('Loaded user data:', userData);
+            
+            // Update the game with the loaded balance
+            this.updateBalance(userData.balance || 10.00);
             return userData;
         } catch (error) {
             console.error('Error loading user data:', error);
+            // If there's an error, set default balance
+            this.updateBalance(10.00);
             return null;
         }
     }
 
     async saveUserData(winAmount = 0, isWin = false, isJackpot = false) {
         try {
-            await fetch(`${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}/update`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    balance: this.balance,
-                    isWin,
-                    winAmount,
-                    isJackpot
-                })
-            });
+            if (!this.webApp.initDataUnsafe?.user?.id) {
+                console.error('No Telegram user ID found');
+                return;
+            }
+
+            const response = await fetch(
+                `${this.apiBaseUrl}/user/${this.webApp.initDataUnsafe.user.id}/update`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        balance: this.balance,
+                        isWin,
+                        winAmount,
+                        isJackpot
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to save user data');
+            }
+
+            const userData = await response.json();
+            console.log('Saved user data:', userData);
+            return userData;
         } catch (error) {
             console.error('Error saving user data:', error);
         }
-    }
-
-    formatMoney(amount) {
-        return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     async initializeGame() {
@@ -82,9 +115,8 @@ class PixelSlots {
         this.winOverlay = document.getElementById('win-overlay');
         this.winAmount = document.getElementById('win-amount');
         this.collectWinButton = document.getElementById('collect-win');
-        this.winAmounts = document.querySelectorAll('.win-amount:not(.jackpot)');
 
-        // Load user data
+        // Load user data first
         await this.loadUserData();
 
         // Set initial values
@@ -106,14 +138,10 @@ class PixelSlots {
         });
     }
 
-    getRandomSymbol() {
-        // 0.01% chance for jackpot symbol (1 in 10,000)
-        if (Math.random() < 0.0001) {
-            return this.jackpotSymbol;
-        }
-        
-        // Otherwise, return a random regular symbol
-        return this.regularSymbols[Math.floor(Math.random() * this.regularSymbols.length)];
+    async updateBalance(amount, winAmount = 0, isWin = false, isJackpot = false) {
+        this.balance = amount;
+        this.balanceDisplay.textContent = this.formatMoney(this.balance);
+        await this.saveUserData(winAmount, isWin, isJackpot);
     }
 
     async spin() {
@@ -124,7 +152,7 @@ class PixelSlots {
 
         this.isSpinning = true;
         this.spinButton.disabled = true;
-        this.updateBalance(this.balance - this.bet);
+        await this.updateBalance(this.balance - this.bet);
 
         try {
             // Start spinning animation
@@ -165,6 +193,10 @@ class PixelSlots {
         }
     }
 
+    formatMoney(amount) {
+        return '$' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
     async checkWin(symbols) {
         // Check if all symbols are the same
         const isWin = symbols.every(s => s === symbols[0]);
@@ -186,12 +218,6 @@ class PixelSlots {
             // Save spin data without win
             await this.saveUserData(this.bet, false, false);
         }
-    }
-
-    async updateBalance(amount, winAmount = 0, isWin = false, isJackpot = false) {
-        this.balance = amount;
-        this.balanceDisplay.textContent = this.formatMoney(this.balance);
-        await this.saveUserData(winAmount, isWin, isJackpot);
     }
 
     showWinDisplay(amount, isJackpot) {
@@ -295,6 +321,16 @@ class PixelSlots {
         this.webApp.onEvent('viewportChanged', () => {
             document.documentElement.style.setProperty('--tg-viewport-height', `${this.webApp.viewportHeight}px`);
         });
+    }
+
+    getRandomSymbol() {
+        // 0.01% chance for jackpot symbol (1 in 10,000)
+        if (Math.random() < 0.0001) {
+            return this.jackpotSymbol;
+        }
+        
+        // Otherwise, return a random regular symbol
+        return this.regularSymbols[Math.floor(Math.random() * this.regularSymbols.length)];
     }
 }
 
